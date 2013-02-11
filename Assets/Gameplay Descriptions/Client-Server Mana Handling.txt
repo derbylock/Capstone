@@ -1,0 +1,43 @@
+Mana must be enforced on the server. Every bit of mana usage should be run through the 
+server to ensure that there is no way for someone to cheat and use a skill that they 
+do not have the mana to use. Obviously, we need some way to trickle this information 
+down to the clients so they can see their character's mana and use their skills 
+accordingly. When we handled health, we didn't have to worry about things like 
+regeneration because we have not yet implemented or planned to implement anything which
+would warrant the need. Mana, on the other hand, is constantly regenerating so if we 
+make client updates every time there's an update, you'd get a message every time the 
+server has an update (so at the time that this was written, upwards of 200 times a 
+second). So how do we avoid that?
+
+Well the short answer is that we have 2 Mana scripts, 1 local and 1 on the server. On 
+the server, the Mana script that is held is used for calculations. It determines the 
+actual mana value that the player has, regardless of what the client says it has. The
+client's Mana script contains the data that is given to it, but it still has to 
+estimate how much mana the player actually has. To do this, we need 2 important values: 
+the player's current mana, and their regen rate. When an update occurs (in the form of 
+either a drain, grant to mana, or change in regen), the server must tell the client 
+about it. This will be done through 3 separate functions, which will be named 
+accordingly, and alter the values on the clients' side.
+
+There is 1 very important thing that needs to be known though: the value that the 
+clients receive is WRONG. Why is that? Well the answer is simple, when a change occurs, 
+the server has to send that change over the network, this incurs a time penalty. So 
+when the server gets a mana drain, it passes that value (not knowing how long it will 
+take to get there) to each client. The value of the client-side Mana scripts is then 
+set, BUT this does not include any regen that may have occured since the time that the 
+update happened. This is simple to fix, as all you need to do is subtract the current 
+Network.time from the timestamp that MUST BE INCLUDED in the RPC call and then 
+multiplying that number times the regen rate; the result of that is the amount of 
+mana that has been regenerated since the message was sent, so there should be no 
+discrepancies between the values on the servers and on the clients.
+
+The tricky part comes when you change the regeneration rate. This isn't too much of an 
+issue, but rather one that has to be thought out before enacting on. When a change in 
+regeneration rate occurs, the server passes the new value and a timestamp to the 
+clients. The clients then take this number and subtract from it the current regeneration 
+value that they have, giving them the change in regeneration that occured. This value 
+is then multiplied by the difference in time between now and the timestamp and added 
+to the client's current mana. This will always reflect the proper amount of mana that 
+was gained or lost since the change in regen, since even in the case of a decrease, 
+the value from the new value minus the old one will ensure that we are subtracting 
+excess mana.

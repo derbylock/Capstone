@@ -1,0 +1,36 @@
+The cone effect spell relies heavily on its collider to determine what is hit. The
+particle effects that come with a cone effect are likely going to be "mesh-based" 
+shapes but unlike several other spell types, it is not necessary for there to be a 
+collision particle effect.
+
+Another distinguishing feature of the cone effect spell is the ability to channel the
+spell by holding down its key. For this reason, it is necessary to distinguish between
+fixed (single hit) and channeled (multiple hits) spells.
+
+The cone effect spell needs to keep track of all objects within its range, which would
+imply either a List or an array of all possible players in the trigger area. It must
+also remove players from its tracker upon exiting to ensure there is no out of range
+target getting hit. While active, this spell must apply its effects to all valid
+targets within its range. In some cases, it may be pertinent for the spell to know
+the direction vector and distance from the player casting it to each viable target.
+
+The one thing that really needs addressing is how to handle its placement. It can be
+continuously attached to the player's hand but may be confusing to actually implement.
+The upside to this is that unless the players spawn close enough to be within the area
+when it is cast, the target will not be recognized as Unity has no way of checking
+for collisions outside of when all colliders are checked.
+
+The most likely solution to this will to be to SphereCast from the caster for the
+full range of the spell. Then, for each player found in the SphereCast, if they are
+a legitimate target, use the dot product on each of the player's colliders to determine
+if they are within the allowed cone.
+
+	Ex 1:	Gust of Wind is a cone effect spell with a 70 degree area of effect and a
+			range of 5 units. Whe the caster uses the attack, a Physics.SphereCastAll
+			is done and the results are checked for any legtimate targets. For each
+			potential target, find the dot product between the vector from the caster
+			to them and then compare it against the allowed angle. If the target dot
+			product result is greater than or equal to the minimum angle, the spell
+			gets the player's Health script from the player manager and tells it to
+			take 10 damage. It then gets the player's movement script and calls an
+			RPC function which causes it to be knocked back slightly.

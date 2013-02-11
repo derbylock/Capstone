@@ -1,0 +1,64 @@
+using UnityEngine;
+using System.Collections;
+
+public class IceBlock : MonoBehaviour {
+	public GameObject iceBlock;
+	public Vector3 offset;
+	private GameObject currentIceBlock;
+	public GameObject breakPiece;
+	public int maxBreak;
+	public float maxEffectTime;
+	private float currentBlockTime;
+	
+	private PlayerController controller;
+
+	// Use this for initialization
+	void Start () {
+		controller = gameObject.GetComponent (typeof(PlayerController)) as PlayerController;
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		if(Input.GetKeyDown (KeyCode.LeftShift)) {
+			currentIceBlock = Instantiate(iceBlock, transform.position, transform.rotation) as GameObject;
+		}
+		
+		if(Input.GetKey(KeyCode.LeftShift)) {
+			// Increment time
+			currentBlockTime += Time.deltaTime;
+			
+			controller.canControl = false;
+			rigidbody.velocity = new Vector3(0.0f, rigidbody.velocity.y, 0.0f);
+			
+			// Move the Ice Block with the player in the even that it moves
+			currentIceBlock.transform.position = transform.position + offset;
+		}
+		
+		if(Input.GetKeyUp (KeyCode.LeftShift)) {
+			// Activate the icebreak
+			controller.canControl = true;
+			Destroy(currentIceBlock);
+			
+			int nPieceSpawns = (int)Mathf.Min((currentBlockTime/maxEffectTime) * maxBreak, maxBreak);
+			
+			Debug.Log (nPieceSpawns);
+			
+			// Spawn each breakPiece and set them off in the right direction
+			for (int i=0; i < nPieceSpawns; i++) {
+				float vecRotation = 360.0f/nPieceSpawns;
+				//Vector3 rotateBy = transform.TransformDirection (Vector3.forward);
+				Quaternion rotateBy = Quaternion.AngleAxis(vecRotation*i, Vector3.up);
+				Vector3 moveBy = transform.forward;
+				
+				
+				GameObject piece = Instantiate(breakPiece, transform.position, Quaternion.identity) as GameObject;
+				Projectile projectile = piece.GetComponent (typeof(Projectile)) as Projectile;
+				
+				projectile.Launch((rotateBy * moveBy * 20.0f) + transform.position, transform.GetInstanceID());
+			}
+			
+			// Reset the timer on the isceBlock
+			currentBlockTime = 0.0f;
+		}
+	}
+}

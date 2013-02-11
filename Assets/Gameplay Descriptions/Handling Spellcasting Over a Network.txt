@@ -1,0 +1,98 @@
+For the sake of preventing as little continuity issues as possible as well as to prevent
+the possibility for cheating and hacks, we want the players to not have much say over
+when and where the spells are cast.
+
+Input will be processed as normal client-side however, here is where we differ from normal
+single player practices. Instead of checking the spell to see if the cooldown is up, seeing
+if the player has enough energy, and then making a call to create the spell if the
+conditions are met, we want to simply pass the information on to the server and let it 
+decide if it is acceptable to cast the spell. What we will need to do then, is pass on 
+the smallest amount of information possible to avoid bandwidth clogging and to ensure that
+the spells are getting cast as fast as possible. The information being passed should 
+include the following:
+-The NetworkPlayer attempting to cast a spell.
+	This gives us a lot of information, most importantly, who they are playing in the game.
+	From this, we gain access to a rich amount of information such as their team, the 
+	spells the player has access to, cooldowns and their location (all of which are stored
+	locally with the location being the only exception to this).
+-The spell ID of the spell being cast.
+	This allows us to look up the spell being cast, how casting is to be handled, the cost
+	of the spell, and what targets are to be affected.
+-The point in worldspace that the player's camera is located.
+	This may exist as part of a separate overload as it serves only to ensure that the 
+	player is casting to a legitimate location (such as a scenario where the player is 
+	attempting to cast through a wall).
+-The point in worldspace that the spell is being cast to.
+	This information is crucial to casting and cannot be determined normally on the server
+	(as a headless box with no camera). It is necessary to determine the distance between 
+	the player and their cast location (which is used to determine short-ranged spell 
+	effectiveness), and to determine the direction that any projectiles are to be cast.
+-The timestamp of the cast.
+	This is not a necessary variable, but instead serves as a minor tweak to ensure that
+	spells are cast from the proper location. This will be discussed in great detail below.
+
+WHY WE NEED A TIMESTAMP
+Normally, if a player attempts to cast a spell, this would get sent to the server with a 
+latency of Caster_Latency, from there the server determines if the player can cast the spell 
+and then attempts to cast it from the last location that the player sent them, taking an 
+additional Proc_Time. In ideal conditions, this wouldn't be much of an issue as they would be 
+sitting on top of the server, however, this would take Caster_Latency+Proc_Time to do and 
+depending on the time that each packet arrives the player could have shifted in such a way 
+that the cast would not go off, or a spell which might have hit the target would miss by a 
+narrow margin. By passing the timestamp of the spellcast we can do a couple of nice things. 
+Firstly, we can interpolate the caster's position at the time of the cast, getting the proper 
+starting position for the spell. And second, we can then determine where the spell should 
+have moved to counting in for latency between not only the caster and the server, but also 
+between the server and all clients.
+
+
+Now we need a scenario to unify all of this and determine how best to approach it from the
+server side of things.
+
+SCENARIO
+Player 1 and player 2 have just started a match. Player 1 wants to get a cast off as soon 
+as possible so he instantly hits the B button on his controller to signal to the game that 
+he would like to use his go-to fireball spell. His client detects the button down and 
+looks up which spell is supposed to be bound to it, it finds the fireball spell's 
+information. His client now begins packaging the spell casting call to be sent to the 
+server, first grabbing its own NetworkPlayer, then the spell ID which it found in the 
+spell it looked up, it finds the location that the player wants to cast to using a Raycast, 
+and then lastly gets the time as of now.
+
+This function then gets passed on to the server where it is picked up and read.
+Simultaneously, on the player's screen a cooldown begins to display, this serves as a 
+visual notification to the player that they have cast the spell and they can see when it 
+will be available again. This cooldown may not be final since the player could have failed 
+to cast the spell due to a distance failure or other issue. For the sake of this scenario, 
+the spell will not fail and this will not need to be reset.
+
+The server looks up the spell ID and grabs the spell it's attached to. It determines, based 
+on the cooldown of that spell, that the spell is off cooldown and after checking the caster's
+energy, also determines that they have enough energy to cast the spell. It is now time to 
+begin casting.
+
+The spell is a projectile, so the server knows it doesn't need to check the distance. The 
+server then gets the avatar attached to the NetworkPlayer, giving it access to a plethora of 
+information, most importantly at this point, the player's location and the joint that the 
+spell is to be cast from, as this projectile comes from the player's hand, allowing it to 
+determine the direction vector of the spell. The location of the player is linearly 
+interpolated to determine their relative location at the time of the cast. For the sake of 
+this scenario, we will not be discussing finding exactly where the cast comes from in 
+worldspace as this is slightly more complicated than is necessary to discuss here and we will 
+assume that the cast goes off from the correct location.
+
+The server now makes a network instantiation call on the fireball and both players see the 
+resulting effects show up on their screen. The server makes a final call for the spell to 
+begin moving and this location data is trickled down to the clients which show the fireball 
+moving towards player 2.
+
+Player 2 is rather slow to react to the fireball moving towards him and doesn't move in 
+time to dodge it. On the server, the fireball sees a collision with player 2's collider and 
+polls the avatar for its team. The server compares this against the caster's team and sees 
+that this player is a viable target for the spell based on the spell's effect list. It then 
+grabs player 2's health and tells it to take the damage defined in the fireball's spell data. 
+Next, it grabs player 2's buff list and adds a burning debuff to the list.
+
+As the server begins a new frame, it checks the buff lists of both of the players and sees 
+that player 2 has the burning debuff and that the debuff has a new tick in waiting. It then 
+applies this debuff's tick damage to player 2's health.

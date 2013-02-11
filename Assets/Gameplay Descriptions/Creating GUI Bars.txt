@@ -1,0 +1,11 @@
+Q: How do we create a clean way to display multiple bars on the screen with different effects, colors, positions, and minor features without the use of additional repetitive code?
+
+It's obvious right away that we need a single, unifying class which represents all of these. And since it was explicitly stated that they were all bars, it should be called something to the effect of GUIBar. Here is what we need and descriptions of why we may need them:
+
+Title - This is not necessary, though it may be a good idea to have it in cases where the players have their own identification, like a gamertag.
+
+Background Texture - This is a simple, static texture which is displayed behind the bar. It is necessary for us to have this because without it, all we have is a bar with no apparent limit.
+
+Bar Color - This is an obvious one; we simply want to have a single 1x1 pixel texture that we can stretch and color in any way we want. We can also use this to provide an alpha to the bar's fill so that the background image can still be seen through it if necessary.
+
+Current/Max Values

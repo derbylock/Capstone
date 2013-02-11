@@ -1,0 +1,27 @@
+Projectiles need to have a shape to them which is determined by a trigger collider.
+This needs to be housed in a GameObject with a particle effect for the projectile in motion.
+There is also a need for a particle effect for when it collides with something.
+It might be best to have the collision particle effect tied to another GameObject and stored
+on a script so that it can be triggered only when needed. and can remain around after the
+projectile has been removed from the scene.
+
+While it would be interesting to see if it was possible to make a game with absolutely no
+aim assist, that would be naught but impossible to play (Turok for Xbox 360 is an amazing
+example of how bad this can be. Therefore, it is necessary to guide projectiles towards
+their target, should the player manage to line up their targetting reticle with another
+player. This will in no way guarantee a hit as a good player should be able to dodge or
+block even the most well-aimed shots.
+
+When the projectile collides with the player's trigger collider (which defines its actual
+body rather than using the capsule collider, the particle effect must stop emitting and
+die out. The contact particle system must spawn and run its course before being deleted
+from the scene. The spell must then determine if the player that was hit is a viable
+target for the spell and upon doing so, go through each effect and apply them.
+
+	Ex:	A fireball spell hits a viable target. The spell then looks at each of its effects
+		and determines that it needs to apply direct damage as well as a buff which 
+		inflicts damage over time to the target. It first applies the direct damage,
+		getting the target's Health script from the scene's player manager and tells it
+		to take 50 damage. It then grabs the target's buff holder (also from the player
+		manager) and tells it to add its buff to the target. The player now takes 5 damage
+		every second for 3 seconds.

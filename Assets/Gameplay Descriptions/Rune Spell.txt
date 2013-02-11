@@ -1,0 +1,10 @@
+Runes are round in shape and placed on a specific spot on the ground. While it could 
+theoretically have just about any shape, it would be easiest to handle a cylindrical
+collider. The rune also needs a texture which will define its appearance and serve as 
+a visual reference to all players as to the size and position of the rune. The 
+possibility for a particle effect to activate on triggering the rune is not entirely 
+necessary but should remain an option.
+
+The quick and dirty option for doing the visuals of this is to use a projector with a
+fairly narrow distance, but the results are sporadic and sometimes faded in various 
+parts on uneven terrain
