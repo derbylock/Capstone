@@ -30,6 +30,8 @@ public class LobbyManager : MonoBehaviour {
   void Start() {
     if(Network.isServer) {
       playerTeams.Add(new NetworkPlayerBundle(Network.player, TEAM_NEUTRAL));
+    } else {
+      networkView.RPC("RequestRoster", RPCMode.Server, Network.player);
     }
   }
 
@@ -47,13 +49,22 @@ public class LobbyManager : MonoBehaviour {
           UpdateServerWithMove(Network.player, TEAM_TWO);
         }
       }
-    } else {
-      if(InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
-        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_NEUTRAL);
-      } else if(InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
-        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_ONE);
-      } else if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
-        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_TWO);
+    }
+
+    // Handle input (even for the server)
+    if(InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
+      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_NEUTRAL);
+    } else if(InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
+      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_ONE);
+    } else if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
+      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_TWO);
+    }
+
+    if(InputReader.GetKeysDownOr(KeyCode.Return)) {
+      if (Network.isServer) {
+        
+      } else {
+
       }
     }
   }
@@ -91,6 +102,18 @@ public class LobbyManager : MonoBehaviour {
       }
     }
     playerTeams.Add(new NetworkPlayerBundle(player, team));
+  }
+
+  [RPC]
+  void RequestRoster(NetworkPlayer me) {
+    for(int i=0; i<playerTeams.Count; ++i) {
+      networkView.RPC("UpdateClient", me, playerTeams[i].player, playerTeams[i].team);
+    }
+  }
+
+  [RPC]
+  void ReadyCheck(NetworkPlayer me, bool ready) {
+    
   }
 
   bool IsTeamJoinable(int team) {
