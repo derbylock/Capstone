@@ -16,9 +16,11 @@ public class LobbyManager : MonoBehaviour {
   public class NetworkPlayerBundle {
     public NetworkPlayer player;
     public int team;
+    public bool ready;
     public NetworkPlayerBundle(NetworkPlayer player, int team) {
       this.player = player;
       this.team = team;
+      this.ready = false;
     }
     public bool Equals(NetworkPlayer player) {
       return this.player == player;
@@ -26,6 +28,10 @@ public class LobbyManager : MonoBehaviour {
   };
 
   public List<NetworkPlayerBundle> playerTeams = new List<NetworkPlayerBundle>();
+
+  void Awake() {
+    DontDestroyOnLoad(gameObject);
+  }
 
   void Start() {
     if(Network.isServer) {
@@ -37,6 +43,7 @@ public class LobbyManager : MonoBehaviour {
 
   void Update() {
     if(Network.isServer) {
+      Debug.Log(playersReady);
       if(playersReady == Network.connections.Length+1) {
         NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
         loader.networkView.RPC("LoadLevel", RPCMode.All, matchLevelName);
@@ -60,67 +67,109 @@ public class LobbyManager : MonoBehaviour {
       networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, TEAM_TWO);
     }
 
-    if(InputReader.GetKeysDownOr(KeyCode.Return)) {
+    //
+    if(InputReader.GetKeysDownOr(KeyCode.Return, KeyCode.KeypadEnter)) {
+      Debug.Log("Doinit");
       if (Network.isServer) {
-        
+        ReadyCheck(Network.player, true);
       } else {
-
+        networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
+      }
+    }
+    
+    if (InputReader.GetKeysDownOr(KeyCode.Backspace, KeyCode.Delete)) {
+      if (Network.isServer) {
+        ReadyCheck(Network.player, false);
+      } else {
+        networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, false);
       }
     }
   }
 
   void OnPlayerConnected(NetworkPlayer player) {
     playerTeams.Add(new NetworkPlayerBundle(player, TEAM_NEUTRAL));
-    for(int i=0; i<playerTeams.Count; ++i) {
-      networkView.RPC("UpdateClient", player, playerTeams[i].player, playerTeams[i].team);
-    }
+    networkView.RPC("UpdateClient", RPCMode.Others, player, TEAM_NEUTRAL, false);
+    /*for(int i=0; i<playerTeams.Count; ++i) {
+      networkView.RPC("UpdateClient", RPCMode.Others, playerTeams[i].player, playerTeams[i].team, playerTeams[i].ready);
+    }*/
   }
 
   [RPC]
   void UpdateServerWithMove(NetworkPlayer mover, int team) {
-    for(int i=0; i<playerTeams.Count; ++i) {
-      if(playerTeams[i].Equals(mover)) {
-        if(team == TEAM_NEUTRAL) {
-          IncrementTeam(playerTeams[i].team, -1);
-          playerTeams[i].team = team;
-        } else if(IsTeamJoinable(team)) {
-          IncrementTeam(playerTeams[i].team, -1);
-          playerTeams[i].team = team;
-          IncrementTeam(team, 1);
-        }
-        networkView.RPC("UpdateClient", RPCMode.Others, mover, team);
+    NetworkPlayerBundle bundle = GetPlayerBundle(mover);
+    if (!bundle.ready) {
+      if (team == TEAM_NEUTRAL) {
+        IncrementTeam(bundle.team, -1);
+        bundle.team = team;
+      } else if (IsTeamJoinable(team)) {
+        IncrementTeam(bundle.team, -1);
+        bundle.team = team;
+        IncrementTeam(team, 1);
       }
+      networkView.RPC("UpdateClient", RPCMode.Others, bundle.player, bundle.team, bundle.ready);
     }
   }
 
   [RPC]
-  void UpdateClient(NetworkPlayer player, int team) {
-    for(int i=0; i<playerTeams.Count; ++i) {
+  void UpdateClient(NetworkPlayer player, int team, bool ready) {
+    NetworkPlayerBundle bundle = GetPlayerBundle(player);
+    if (bundle != null) {
+      bundle.team = team;
+      bundle.ready = ready;
+    } else {
+      playerTeams.Add(new NetworkPlayerBundle(player, team));
+    }
+    /*for(int i=0; i<playerTeams.Count; ++i) {
       if(playerTeams[i].Equals(player)) {
         playerTeams[i].team = team;
         return;
       }
     }
-    playerTeams.Add(new NetworkPlayerBundle(player, team));
+    playerTeams.Add(new NetworkPlayerBundle(player, team));*/
   }
 
   [RPC]
-  void RequestRoster(NetworkPlayer me) {
+  void RequestRoster(NetworkPlayer requester) {
     for(int i=0; i<playerTeams.Count; ++i) {
-      networkView.RPC("UpdateClient", me, playerTeams[i].player, playerTeams[i].team);
+      networkView.RPC("UpdateClient", requester, playerTeams[i].player, playerTeams[i].team, playerTeams[i].ready);
     }
   }
 
   [RPC]
   void ReadyCheck(NetworkPlayer me, bool ready) {
-    
+    bool changeMade = false;
+    NetworkPlayerBundle bundle = GetPlayerBundle(me);
+    if (ready && (bundle.team == TEAM_ONE || bundle.team == TEAM_TWO)) {
+      changeMade = true;
+      bundle.ready = ready;
+      ++playersReady;
+    } else {
+      changeMade = true;
+      bundle.ready = ready;
+      --playersReady;
+    }
+
+    if (changeMade) {
+      networkView.RPC("UpdateClient", RPCMode.Others, bundle.player, bundle.team, bundle.ready);
+    }
+  }
+
+  NetworkPlayerBundle GetPlayerBundle(NetworkPlayer player) {
+    for (int i = 0; i < playerTeams.Count; ++i) {
+      if (playerTeams[i].Equals(player)) {
+        return playerTeams[i];
+      }
+    }
+    return null;
   }
 
   bool IsTeamJoinable(int team) {
     if(team == TEAM_ONE && playersOnTeamOne <= playersOnTeamTwo) {
+      Debug.Log(playersOnTeamOne + " <= " + playersOnTeamTwo);
       return true;
     }
     if (team == TEAM_TWO && playersOnTeamTwo <= playersOnTeamOne) {
+      Debug.Log(playersOnTeamTwo + " <= " + playersOnTeamOne);
       return true;
     }
     return false;
@@ -141,6 +190,7 @@ public class LobbyManager : MonoBehaviour {
       GUILayout.BeginHorizontal();
       GUILayout.Label("Player: " + playerTeams[i].player);
       GUILayout.Label("Team: " +  playerTeams[i].team);
+      GUILayout.Label("Ready: " + (playerTeams[i].ready ? "Locked In" : "Pending"));
       GUILayout.EndHorizontal();
     }
   }

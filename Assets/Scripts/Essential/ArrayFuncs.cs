@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 public class ArrayFuncs {
-  public static void PushObjectsToFront<T>(ref IList<T> arr) {
+  /*public static void PushObjectsToFront<T>(ref IList<T> arr) {
     try {
       int firstNullIndex = arr.IndexOf(null); //FindFirstNull(arr);
       if(firstNullIndex == -1 || firstNullIndex == arr.Length-1) {

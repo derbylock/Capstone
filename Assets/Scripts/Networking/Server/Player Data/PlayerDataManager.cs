@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(NetworkView))]
 public class PlayerDataManager : MonoBehaviour {
+  
 	public const float DEFAULT_HEALTH = 1000f;
 	public const float DEFAULT_MANA = 500f;
 	public const float DEFAULT_MANA_REGEN = 100f;
@@ -123,7 +124,7 @@ public class PlayerDataManager : MonoBehaviour {
         return null;
     }
 	
-	/*/// <summary>
+	/// <summary>
 	/// Returns the buff list of the character controlled by the selected NetworkPlayer.
 	/// </summary>
 	public BuffContainer GetBuffs (NetworkPlayer target) {
@@ -143,7 +144,7 @@ public class PlayerDataManager : MonoBehaviour {
 				players[i].m_avatar = avatar;
 			}
 		}
-	}*/
+	}
 	
 	/*public int GetPlayerTeam(NetworkPlayer target) {
 		for(int i=0;i<m_teamOne.Length; i++) {
@@ -159,7 +160,7 @@ public class PlayerDataManager : MonoBehaviour {
 		return -1;
 	}*/
 	
-	/*[RPC]
+	[RPC]
 	public void DamageTarget(NetworkPlayer target, float amount) {
 		bool applied = false;
 		for(int i=0; i<m_teamOne.Length; i++) {
@@ -177,7 +178,7 @@ public class PlayerDataManager : MonoBehaviour {
 				}
 			}
 		}
-	}*/
+	}
 	
 	public PlayerContainer[] GetMyTeam(int myTeam) {
 		if(myTeam == 0) {
@@ -299,7 +300,7 @@ public class PlayerDataManager : MonoBehaviour {
 		m_teamNeutral = new PlayerContainer[MAX_TEAM_SIZE*2];
 	}
 	
-	/*public void InitializeTeamHealth() {
+	public void InitializeTeamHealth() {
 		List<NetworkPlayer> temp = new List<NetworkPlayer>();
 		List<float> tempPercent = new List<float>();
 		
@@ -328,5 +329,5 @@ public class PlayerDataManager : MonoBehaviour {
 		}
 		m_playerValuePool.networkView.RPC ("SetTeam", RPCMode.AllBuffered, 1, temp.ToArray());
 		m_playerValuePool.networkView.RPC ("UpdateTeam", RPCMode.AllBuffered, 1, tempPercent.ToArray());
-	}*/
+	}
 }
