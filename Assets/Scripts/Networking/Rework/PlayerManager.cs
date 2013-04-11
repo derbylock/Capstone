@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviour {
-  /*public List<PlayerData> activePlayers;
+  public List<PlayerData> activePlayers;
   private GameObject valuePool;
   
   void Start() {
@@ -51,8 +51,8 @@ public class PlayerManager : MonoBehaviour {
     for (int i = 0; i < avatars.Length; ++i) {
       if (avatars[i].networkView.owner == player) {
         target.avatar = avatars[i];
-        target.health = target.avatar.AddComponent<Health>();
-        target.mana = target.avatar.AddComponent<Mana>();
+        target.health = target.avatar.AddComponent<HealthRework>();
+        target.mana = target.avatar.AddComponent<ManaRework>();
       }
     }
   }
@@ -91,5 +91,5 @@ public class PlayerManager : MonoBehaviour {
     if ((updatesList & Constants.RESOURCE_UPDATE_CURRENT) == Constants.RESOURCE_UPDATE_CURRENT) {
       valuePool.networkView.RPC("UpdatePlayerHealth", RPCMode.Others, player.team, player.health.GetPercentage(), Network.time);
     }
-  }*/
+  }
 }

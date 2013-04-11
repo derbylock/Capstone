@@ -36,8 +36,4 @@ public class InputReader {
     }
     return true;
   }
-
-  public static Vector2 GetInputVector2(string x, string y) {
-    return new Vector2(Input.GetAxis(x), Input.GetAxis(y));
-  }
 }

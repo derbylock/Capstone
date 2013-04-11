@@ -10,7 +10,7 @@ public class ConeSpell : Spell {
 	public float m_coneAngle;
 	private List<GameObject> m_targets = new List<GameObject>();
 	
-	public override void Cast (Vector3 castTo) {
+	public override void Cast (Vector3 castFrom, Vector3 castTo) {
 		if(m_activationEffect) {
 			Network.Instantiate(m_activationEffect, m_myCaster.position, m_myCaster.rotation, 0);
 		}

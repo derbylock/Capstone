@@ -5,6 +5,15 @@ using System.Collections.Generic;
 public class AreaSpell : Spell {
 	protected bool m_isInPlace = false;
 	protected List<GameObject> m_targets = new List<GameObject>();
+  
+  public override bool WillCastSuccessfully(Vector3 from, Vector3 to) {
+    RaycastHit hit;
+    
+    if(Physics.Raycast(from, Vector3.Normalize(to-from), out hit, m_maxDistance)) {
+      return true;
+    }
+    return false;
+  }
 	
 	public virtual void AddTarget(GameObject target) {
 		if(m_isInPlace) {

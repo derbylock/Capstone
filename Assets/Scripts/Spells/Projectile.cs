@@ -19,7 +19,7 @@ public class Projectile : Spell {
 		}
 	}
 	
-	public override void Cast(Vector3 castTo) {
+	public override void Cast(Vector3 castFrom, Vector3 castTo) {
 		// Get direction vector
 		direction = Vector3.Normalize(castTo-transform.position);
 		// Begin moving

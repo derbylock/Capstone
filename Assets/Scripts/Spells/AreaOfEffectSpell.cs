@@ -28,55 +28,77 @@ public class AreaOfEffectSpell : AreaSpell {
 	public override void Cast (Vector3 castFrom, Vector3 castTo) {
 		RaycastHit hit;
 		
-		Debug.Log ("Casting AoE Spell");
-		Debug.Log (castFrom + " : " + castTo);
-		if(Physics.Raycast(castFrom, Vector3.Normalize(castTo-castFrom), out hit, m_maxDistance)) {
-			transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-			transform.position = hit.point; // + transform.TransformDirection(Vector3.up) * 0.1f;
-		} else {
-			Network.Destroy(gameObject);
-		}
+    Debug.Log ("Casting AoE Spell");
+    Debug.Log (castFrom + " : " + castTo);
+    if(Physics.Raycast(castFrom, Vector3.Normalize(castTo-castFrom), out hit, m_maxDistance)) {
+      transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+      transform.position = hit.point; // + transform.TransformDirection(Vector3.up) * 0.1f;
+    } else {
+      Network.Destroy(gameObject);
+    }
 		
 		if(m_mainEffect) {
 			Network.Instantiate(m_mainEffect,
-								transform.position + (transform.up*m_distanceAbove),
-								Quaternion.FromToRotation(m_mainEffectOrientation, transform.up), 0);
+                transform.position + (transform.up*m_distanceAbove),
+                Quaternion.FromToRotation(m_mainEffectOrientation, transform.up), 0);
 		}
 		
-		m_isInPlace = true;
-	}
+    m_isInPlace = true;
+  }
 	
-	public override void AddTarget (GameObject target) {
-		if(Network.isServer) {
-			Debug.Log ("Adding " + target.name + " to " + gameObject.name + " target list.");
-			if(m_isInPlace && !m_targets.Contains(target)) {
-				m_targets.Add(target);
-			}
-		}
-	}
+  public override void AddTarget (GameObject target) {
+    if(Network.isServer) {
+      Debug.Log ("Adding " + target.name + " to " + gameObject.name + " target list.");
+      if(m_isInPlace && !m_targets.Contains(target)) {
+        m_targets.Add(target);
+      }
+    }
+  }
 	
-	IEnumerator RunSpell() {
-		for(int i=0; i<m_tickCount; i++) {
-			yield return new WaitForSeconds(m_tickSpacing);
-			TriggerEffects(m_targets.ToArray());
-		}
+  IEnumerator RunSpell() {
+    Vector3 extents = collider.bounds.extents;
+    // NOTE:
+    // We are using the 2D version of the Pythagorean Theorem because
+    // in this scenario, we only want the distance to the nearest wall
+    // rather than to the corner (which would be the result of the 3D
+    // version of the equation. This is necessary because we are dealing
+    // with cylindrical colliders, whose radii are the length of their
+    // nearest bounding box wall. As such, the collider never reaches as
+    // far as the corner of the bounding box.
+    float overlapSphereSize = Mathf.Sqrt(extents.x*extents.x + extents.y*extents.y);
+      
+    for(int i=0; i<m_tickCount; i++) {
+      yield return new WaitForSeconds(m_tickSpacing);
+      
+      Collider[] hits = Physics.OverlapSphere(transform.position, overlapSphereSize);
+      if(hit != null) {
+        List<GameObject> targets = new List();
+        for(int i=0; i<hits.Length; ++i) {
+          if(hits[i].tag == "Player") {
+            Vector3 distance = hits[i].transform.position-transform.position;
+             
+            if(Mathf.Abs(distance.x) <= extents.x && Mathf.Abs(distance.y) <= extents.y) {
+              targets.Add(hits[i].gameObject);
+            }
+          }
+        }
+        TriggerEffects(targets.ToArray());
+      }
+      //TriggerEffects(m_targets.ToArray());
+    }
 		
-		Network.Destroy(gameObject);
-	}
+    Network.Destroy(gameObject);
+  }
+
+  /*void OnTriggerEnter(Collider other) {
+    AddTarget(other.gameObject);
+  }
 	
-	void AddInitialTargets() {
-		
-	}
+  void OnTriggerExit(Collider other) {
+    RemoveTarget(other.gameObject);
+  }
 	
-	/*void OnTriggerEnter(Collider other) {
-		AddTarget(other.gameObject);
-	}
-	
-	void OnTriggerExit(Collider other) {
-		RemoveTarget(other.gameObject);
-	}
-	
-	void OnTriggerStay(Collider other) {
-		AddTarget(other.gameObject);
-	}*/
+  void OnTriggerStay(Collider other) {
+    AddTarget(other.gameObject);
+  }*/
 }

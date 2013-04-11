@@ -92,16 +92,40 @@ public class Spell : MonoBehaviour {
 		}
 	}
 	
+  // Deprecated
+  // Reason: Unnecessary overload, never used
 	public virtual void Cast() {
 		// Intentionally Blank
 	}
 	
+  // Deprecated
+  // Reason: Unnecessary overload, there is no use for having multiple
+  // calls for different types of spells; simply call Cast(from, to)
+  // and ignore the from variable within the specific class method override.
 	public virtual void Cast(Vector3 castTo) {
 		// Intentionally Blank
 	}
 	
 	public virtual void Cast(Vector3 castFrom, Vector3 castTo) {
-		
+		// Intentionally Blank
+	}
+	
+  // Used to determine beforehand if a spell will actually be cast.
+  // This is mainly important for targetted spells which have a set
+  // maximum range. All spell types which do not require this should
+  // not overwrite this function.
+  // Current spells which do not need this functionality:
+  //  - Projectile
+  //  - Blast
+  //  - Cone
+  // The following spells do not need this implemented within their
+  // respective scripts:
+  //  - Area of Effect
+  //    - Reason: Implemented in superclass (AreaSpell)
+  //  - Rune
+  //    - Reason: Implemented in superclass (AreaSpell)
+	public virtual bool WillCastSuccessfully(Vector3 castFrom, Vector3 castTo) {
+		return true;
 	}
 	
 	#region Applying Effects

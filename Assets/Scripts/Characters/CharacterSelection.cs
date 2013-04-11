@@ -2,25 +2,26 @@ using UnityEngine;
 using System.Collections;
 
 public class CharacterSelection : MonoBehaviour {
-	public bool isSelecting;
-	public string prefabFolder = "PlayableCharacters";
+  public bool isWaiting = true;
+  public bool isSelecting;
+  public string prefabFolder = "PlayableCharacters";
   private string defaultIcon = "PlayableCharacters/Icons/NoIcon.png";
 	
-	private GameObject[] characters;
-	private Texture2D[] textures;
+  private GameObject[] characters;
+  private Texture2D[] textures;
   public Texture2D noIcon;
 	
-	public float iconSize = 32f;
-	public float hIconBuffer = 8f;
-	public float vIconBuffer = 16f;
+  public float iconSize = 32f;
+  public float hIconBuffer = 8f;
+  public float vIconBuffer = 16f;
   private float sideBuffer;       // Space between sides of the window and the icons
-	public Rect iconScreenAllotment = new Rect(0.05f, 0.05f, 0.9f, 0.5f);
+  public Rect iconScreenAllotment = new Rect(0.05f, 0.05f, 0.9f, 0.5f);
   private Rect charWindowSize;
-	private int rows, cols;
+  private int rows, cols;
 
   private bool useScrollArea;
   private Vector2 scrollPosition;
-	
+    
 	#region Character Spawning NYI
 	// A list of points as screenspace coordinates which will be
 	// used to determine the proper positioning of the characters.
@@ -30,12 +31,19 @@ public class CharacterSelection : MonoBehaviour {
 	// during the character select sequence.
 	private Vector3[] dynamicSpawnPoints; 
 	#endregion
+  private GameObject localSelectedCharacter;
+  private GameObject instantedCharacter;
+  public Transform tempSpawnPoint;
 	
 	void Start() {
 		Object[] temp = Resources.LoadAll(prefabFolder, typeof(GameObject));
+		Debug.Log("Length of temp: " + temp.Length);
     characters = new GameObject[temp.Length];
     for(int i=0; i < temp.Length; ++i) {
+      Debug.Log("Loading Character " + i);
+	  Debug.Log("temp array @ " + i + " is " + (temp[i] == null ? "null" : "not null"));
       characters[i] = temp[i] as GameObject;
+	  Debug.Log("character array write status: " + (characters[i] == null ? "failed" : "success"));
     }
 
 		textures = new Texture2D[characters.Length];
@@ -71,17 +79,21 @@ public class CharacterSelection : MonoBehaviour {
     }
 	
 	void OnGUI() {
-    if (isSelecting) {
-      GUI.Window(Constants.WINID_CHAR_SELECT,
-                  charWindowSize,
-                  CharacterSelectWindow,
-                  "Select A Character");
-    } else {
-      if(GUI.Button(new Rect( Screen.width/2 - 75,
-                              Screen.height/6*5,
-                              150, 30),
-                    "Select Character")) {
-        isSelecting = true;
+    if (!isWaiting) {
+      if (isSelecting) {
+        GUI.Window(Constants.WINID_CHAR_SELECT,
+                    charWindowSize,
+                    CharacterSelectWindow,
+                    "Select A Character");
+      } else {
+        if (GUI.Button(new Rect(Screen.width / 2 - 75,
+                                Screen.height / 6 * 5,
+                                150, 30),
+                      "Select Character")) {
+          isSelecting = true;
+          LobbyManager lobby = GameObject.FindObjectOfType(typeof(LobbyManager)) as LobbyManager;
+          lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, false);
+        }
       }
     }
 	}
@@ -104,6 +116,13 @@ public class CharacterSelection : MonoBehaviour {
 
         if (GUILayout.Button(character, GUILayout.Width(iconSize), GUILayout.Height(iconSize))) {
           Debug.Log("Selected: " + current.name);
+          localSelectedCharacter = characters[i*cols+j];
+          Network.Destroy (instantedCharacter.gameObject);
+          instantedCharacter = Network.Instantiate(characters[i*cols+j], tempSpawnPoint.position, tempSpawnPoint.rotation, 0) as GameObject;
+          isSelecting = false;
+
+          LobbyManager lobby = GameObject.FindObjectOfType(typeof(LobbyManager)) as LobbyManager;
+          lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
         }
 
         GUILayout.FlexibleSpace();

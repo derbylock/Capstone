@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class BlastSpell : Spell {
-	private const float SPHERE_MOVE_DISTANCE = 0.0001F;
+	//private const float SPHERE_MOVE_DISTANCE = 0.0001F;
 	
 	public float m_radius;
 	public GameObject m_activationEffect;
 	private List<GameObject> m_targets = new List<GameObject>();
 	
-	public override void Cast (Vector3 castTo) {
+	public override void Cast (Vector3 castFrom, Vector3 castTo) {
 		Network.Instantiate(m_activationEffect, m_myCaster.position, m_myCaster.rotation, 0);
 		
 		FindTargets();
@@ -22,8 +22,9 @@ public class BlastSpell : Spell {
 	}
 	
 	void FindTargets() {
-		RaycastHit[] hits = Physics.SphereCastAll(m_myCaster.position, m_radius, Vector3.up, SPHERE_MOVE_DISTANCE);
-		
+		//RaycastHit[] hits = Physics.SphereCastAll(m_myCaster.position, m_radius, Vector3.up, SPHERE_MOVE_DISTANCE);
+    Collider[] hits = Physics.OverlapSphere(transform.position, m_radius);
+
 		if(hits != null && hits.Length > 0) {
 			
 			for(int i=0; i<hits.Length; i++) {
