@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class CharacterData : ScriptableObject {
+public class CharacterData : MonoBehaviour {
 	public string devName;		// Used for loading Resources
 	public string name;			// Actual character name
 	public string magicType;	// Type of magic they use

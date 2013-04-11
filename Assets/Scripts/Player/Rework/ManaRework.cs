@@ -13,10 +13,9 @@ public class ManaRework : MonoBehaviour {
     return manaUpdates;
   }
 	
-	public float Percentage {
-    get {
-      manaUpdates &= ~Constants.RESOURCE_UPDATE_CURRENT;
-			return currentMana/maxMana; }
+	public float GetPercentage() {
+    manaUpdates &= ~Constants.RESOURCE_UPDATE_CURRENT;
+		return currentMana/maxMana;
 	}
 
 	void Start () {

@@ -91,10 +91,5 @@ public class PlayerManager : MonoBehaviour {
     if ((updatesList & Constants.RESOURCE_UPDATE_CURRENT) == Constants.RESOURCE_UPDATE_CURRENT) {
       valuePool.networkView.RPC("UpdatePlayerHealth", RPCMode.Others, player.team, player.health.GetPercentage(), Network.time);
     }
-  }
-
-  [RPC]
-  void AnnounceDisconnect(NetworkPlayer player) {
-
   }*/
 }

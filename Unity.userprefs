@@ -1,0 +1,16 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Characters\CharacterSelection.cs">
+    <Files>
+      <File FileName="Assets\Scripts\Essential\DevTools.cs" Line="12" Column="59" />
+      <File FileName="Assets\Scripts\Networking\Management\NetworkManager.cs" Line="52" Column="1" />
+      <File FileName="Assets\Scripts\FollowScript.cs" Line="126" Column="7" />
+      <File FileName="Assets\Scripts\Networking\Rework\LobbyManager.cs" Line="33" Column="17" />
+      <File FileName="Assets\Scripts\Characters\CharacterSelection.cs" Line="95" Column="8" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 
 public class HealthRework : MonoBehaviour {
+  private int healthUpdates = 0x0;
+
 	public float maxHealth;
 	public float regenRate;
 	public float currentHealth;
@@ -12,21 +14,18 @@ public class HealthRework : MonoBehaviour {
 	}
 	
 	public float GetPercentage() {
-		changedSinceLastFetch = false;
+    healthUpdates &= ~Constants.RESOURCE_UPDATE_CURRENT;
 		return currentHealth/maxHealth;
 	}
 	
-	public bool HasUpdate {
-		get { return changedSinceLastFetch; }
-	}
-
   public int GetUpdates() {
-    Debug.LogError("NOT YET IMPLEMENTED: Health.GetUpdates()");
-    return -1;
+    return healthUpdates;
   }
 	
 	public void SetHealth(float health) {
-		changedSinceLastFetch = true;
+    healthUpdates |= Constants.RESOURCE_UPDATE_CURRENT;
+    healthUpdates |= Constants.RESOURCE_UPDATE_MAXIMUM;
+
 		maxHealth = health;
 		currentHealth = maxHealth;
 	}
@@ -35,16 +34,17 @@ public class HealthRework : MonoBehaviour {
 	void Start () {
 		currentHealth = maxHealth;
 	}
-	
+
 	public void ReceiveDamage(float amount) {
-		changedSinceLastFetch = true;
+    healthUpdates |= Constants.RESOURCE_UPDATE_CURRENT;
+
 		currentHealth = Mathf.Max(0f, currentHealth-amount);
-		
 		if(currentHealth == 0f) { OnDeath(); }
 	}
 	
 	public void ReceiveHeal(float amount) {
-		changedSinceLastFetch = true;
+    healthUpdates |= Constants.RESOURCE_UPDATE_CURRENT;
+
 		currentHealth = Mathf.Min (maxHealth, currentHealth+amount);
 	}
 	
