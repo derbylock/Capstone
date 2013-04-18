@@ -247,7 +247,7 @@ public class PlayerDataManager : MonoBehaviour {
 		// Find the player's avatar and assign it if found
 		GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
 		foreach (GameObject p in playerObjects) {
-			if(p.networkView.owner == player) {
+			if(p.transform.root.networkView.owner == player) {
 				newPlayer.m_avatar = p;
 				break;
 			}

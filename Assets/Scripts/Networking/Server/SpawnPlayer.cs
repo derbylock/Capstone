@@ -63,10 +63,12 @@ public class SpawnPlayer : MonoBehaviour {
 		player = Network.Instantiate(playerObject, transform.position, Quaternion.identity, 0) as GameObject;
 		GameObject camera = Instantiate(playerCam) as GameObject;
 		FollowScript camFollow = camera.GetComponent(typeof(FollowScript)) as FollowScript;
+    //CameraFollow camFollow = camera.GetComponent<CameraFollow>();
 		Team team = player.GetComponent(typeof(Team)) as Team;
 		
 		if(camFollow) {
-			camFollow.target = player.transform;
+			//camFollow.target = player.transform;
+      camFollow.AssignTarget(player.transform);
 		} else {
 			Debug.Log("Can't find FollowScript");
 		}
@@ -117,9 +119,13 @@ public class SpawnPlayer : MonoBehaviour {
 		
 		// Set up the camera
 		GameObject camera = Instantiate(playerCam) as GameObject;
-		FollowScript camFollow = camera.GetComponent<FollowScript>();
-		camFollow.target = player.transform;
+		//FollowScript camFollow = camera.GetComponent<FollowScript>();
+		//CameraFollow camFollow = camera.GetComponent<CameraFollow>();
+		CameraController camFollow = camera.GetComponent<CameraController>();
 		
+		//camFollow.target = player.transform;
+    camFollow.AssignTarget(player.transform);
+
 		PlayerRegister registry = player.GetComponent<PlayerRegister>();
 		registry.Register();
 		

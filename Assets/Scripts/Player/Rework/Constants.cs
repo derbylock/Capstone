@@ -9,6 +9,8 @@
 
   public const int WINID_CHAR_SELECT = 1;
 
+  public const float MIN_RECAST_TIME = 0.2f;
+
   public static bool HasConstant(int target, int flag) {
     return (target & flag) == flag;
   }

@@ -2,7 +2,9 @@ using UnityEngine;
 using System.Collections;
 
 public class FollowScript : MonoBehaviour {
+  public GameObject marker;
 	public Transform target;
+  public string shoulder = "Shoulder Mount";
 	public bool rotateTarget = false;
 	
 	public float distance = 10.0f;
@@ -44,6 +46,9 @@ public class FollowScript : MonoBehaviour {
 	
 	void LateUpdate () {
 	    if (target) {
+        if (Input.GetKeyDown(KeyCode.R)) {
+          Instantiate(marker, target.position, Quaternion.identity);
+        }
 			
 			// If we are pressing down LMB, get the changes in x and y values from the mouse.
 	    	//if (Input.GetMouseButton(1)){
@@ -64,7 +69,7 @@ public class FollowScript : MonoBehaviour {
 			// Support for zooming in and out if needed.
 			if (useScrollWheel) {
 				distance += Input.GetAxis("Mouse ScrollWheel") * -scrollSpeed;
-				distance = AdjustDistance (distance, minDistance, maxDistance);
+        distance = Mathf.Clamp(distance, minDistance, maxDistance);// AdjustDistance(distance, minDistance, maxDistance);
 			}
 			
 			// TODO: FIGURE THIS OUT
@@ -77,13 +82,16 @@ public class FollowScript : MonoBehaviour {
 			// Now we have to find a point that is not clipped by another object.
 			// If we did adjust the distance at all, subtract an additional buffer to prevent clipping.
 			Vector3 rayDirection = position - target.position;
-			RaycastHit[] hits = Physics.RaycastAll (target.position, rayDirection, distance);
+      RaycastHit[] hits = Physics.SphereCastAll(target.position, 0.5f, rayDirection, distance);// Physics.RaycastAll(target.position, rayDirection, distance);
 			
 			float nearestHit = distance;
 			foreach(RaycastHit hit in hits) {
+        if (Input.GetKeyDown(KeyCode.R)) {
+          Instantiate(marker, hit.point, Quaternion.identity);
+        }
 				if(!hit.collider.isTrigger && hit.transform.root.tag != "Player") {
 					//Debug.Log(hit.collider.gameObject.name);
-					if(hit.distance < minDistance) {
+					if(hit.distance < nearestHit) {
 						nearestHit = hit.distance;
 					}
 				}
@@ -105,8 +113,12 @@ public class FollowScript : MonoBehaviour {
 			
 			
 			if(rotateTarget) {
-				target.rotation = Quaternion.Euler(new Vector3(0.0f, transform.rotation.eulerAngles.y, 0.0f));
+				target.parent.rotation = Quaternion.Euler(new Vector3(0.0f, transform.rotation.eulerAngles.y, 0.0f));
 			}
+
+      if (Input.GetKeyDown(KeyCode.R)) {
+        Instantiate(marker, transform.position, Quaternion.identity);
+      }
 	    }
 	}
 	
@@ -126,4 +138,13 @@ public class FollowScript : MonoBehaviour {
 		else
 			return current;
 	}
+
+  public void AssignTarget(Transform target) {
+    for(int i=0; i<target.GetChildCount(); ++i) {
+      if(target.GetChild(i).name == shoulder) {
+        this.target = target.GetChild(i);
+        break;
+      }
+    }
+  }
 }

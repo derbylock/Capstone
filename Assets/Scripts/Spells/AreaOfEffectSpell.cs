@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class AreaOfEffectSpell : AreaSpell {
 	public float m_distanceAbove = 10f;
@@ -56,7 +57,7 @@ public class AreaOfEffectSpell : AreaSpell {
   }
 	
   IEnumerator RunSpell() {
-    Vector3 extents = collider.bounds.extents;
+    Vector3 extents = transform.GetChild(0).collider.bounds.extents;
     // NOTE:
     // We are using the 2D version of the Pythagorean Theorem because
     // in this scenario, we only want the distance to the nearest wall
@@ -71,14 +72,14 @@ public class AreaOfEffectSpell : AreaSpell {
       yield return new WaitForSeconds(m_tickSpacing);
       
       Collider[] hits = Physics.OverlapSphere(transform.position, overlapSphereSize);
-      if(hit != null) {
-        List<GameObject> targets = new List();
-        for(int i=0; i<hits.Length; ++i) {
-          if(hits[i].tag == "Player") {
-            Vector3 distance = hits[i].transform.position-transform.position;
+      if(hits != null) {
+        List<GameObject> targets = new List<GameObject>();
+        for(int j=0; j<hits.Length; ++j) {
+          if(hits[j].tag == "Player") {
+            Vector3 distance = hits[j].transform.position-transform.position;
              
             if(Mathf.Abs(distance.x) <= extents.x && Mathf.Abs(distance.y) <= extents.y) {
-              targets.Add(hits[i].gameObject);
+              targets.Add(hits[j].gameObject);
             }
           }
         }

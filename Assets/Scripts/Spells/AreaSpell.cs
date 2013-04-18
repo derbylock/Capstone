@@ -35,7 +35,7 @@ public class AreaSpell : Spell {
 			Team targetTeam = m_targets[i].GetComponent<Team>();
 			bool sameTeam = (targetTeam.m_teamNumber == m_Team ? true : false);
 			for(int j=0; j<m_effects.Length; j++) {
-				switch(m_effects[i].targets) {
+				switch(m_effects[j].targets) {
 				case EffectTargets.ALL:
 					return true;
 				case EffectTargets.ALLY:

@@ -32,8 +32,7 @@ public class NetworkMatchStart : MonoBehaviour {
 			if(sequenceComplete) {
 				GameObject[] playersUnlock = GameObject.FindGameObjectsWithTag("Player");
 				for(int i=0; i<playersUnlock.Length; i++) {
-					playersUnlock[i].networkView.RPC("UnlockPlayer", RPCMode.All);
-					
+					playersUnlock[i].transform.root.networkView.RPC("UnlockPlayer", RPCMode.All);
 				}
 				
 				WinController controller = gameObject.GetComponent<WinController>();
@@ -90,7 +89,7 @@ public class NetworkMatchStart : MonoBehaviour {
 		} while(players.Length < 2);
 		
 		for(int i=0; i<players.Length; i++) {
-			players[i].networkView.RPC("ReadyPlayer", RPCMode.All);
+			players[i].transform.root.networkView.RPC("ReadyPlayer", RPCMode.All);
 		}
 	}
 }

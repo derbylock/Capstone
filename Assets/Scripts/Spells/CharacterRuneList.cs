@@ -24,15 +24,31 @@ public class CharacterRuneList {
     }
     
     public void AddRune(Transform rune) {
-      int[] totalRunes = Array.FindAll(activeRunes, null);
-      if(totalRunes.Length == activeRunes.Length) {
-        Network.Destroy(activeRunes[0]);
+      int occupiedSlots = 0;
+      for (int i = 0; i < activeRunes.Length; ++i) {
+        if (activeRunes[i] != null) {
+          ++occupiedSlots;
+        }
+      }
+
+      if (occupiedSlots == activeRunes.Length) {
+        Network.Destroy(activeRunes[0].gameObject);
         activeRunes[0] = null;
       }
+
+      /*Transform[] totalRunes = Array.FindAll(activeRunes, null);
+      if(totalRunes.Length == activeRunes.Length) {
+        Network.Destroy(activeRunes[0].gameObject);
+        activeRunes[0] = null;
+      }*/
       
       Update(); // Push all runes forward on the queue
-      int placementIndex = Array.FindIndex(activeRunes, null);
-      activeRunes[placementIndex] = rune;
+      for (int j = 0; j < activeRunes.Length; ++j) {
+        if (activeRunes[j] == null) {
+          activeRunes[j] = rune;
+        }
+      }
+      
     }
     
     public bool Equals(Transform owner) {

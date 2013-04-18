@@ -20,6 +20,7 @@ public class Projectile : Spell {
 	}
 	
 	public override void Cast(Vector3 castFrom, Vector3 castTo) {
+    Debug.Log("Cast Success");
 		// Get direction vector
 		direction = Vector3.Normalize(castTo-transform.position);
 		// Begin moving
@@ -28,6 +29,7 @@ public class Projectile : Spell {
 	}
 	
 	IEnumerator Move() {
+    Debug.Log("Moving");
 		currentDistance = 0;
 		while (!activated && currentDistance < maxDistance) {
 			// TODO: Apply logic for aim assist
