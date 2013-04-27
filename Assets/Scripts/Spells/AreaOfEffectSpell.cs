@@ -27,6 +27,7 @@ public class AreaOfEffectSpell : AreaSpell {
 	}
 	
 	public override void Cast (Vector3 castFrom, Vector3 castTo) {
+    base.Cast (castFrom, castTo);
 		RaycastHit hit;
 		
     Debug.Log ("Casting AoE Spell");

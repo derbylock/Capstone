@@ -8,6 +8,8 @@ public class HealthRework : MonoBehaviour {
 	public float regenRate;
 	public float currentHealth;
 	public bool changedSinceLastFetch = false;
+
+  public Armor armor;
 	
 	public bool IsAlive {
 		get { return currentHealth > 0f; }
@@ -36,7 +38,14 @@ public class HealthRework : MonoBehaviour {
 	}
 
 	public void ReceiveDamage(float amount) {
+    if (armor == null) {
+      armor = gameObject.GetComponent<Armor>();
+    }
+
     healthUpdates |= Constants.RESOURCE_UPDATE_CURRENT;
+
+    float damageMod = 1 - armor.armor;
+    amount *= damageMod;
 
 		currentHealth = Mathf.Max(0f, currentHealth-amount);
 		if(currentHealth == 0f) { OnDeath(); }

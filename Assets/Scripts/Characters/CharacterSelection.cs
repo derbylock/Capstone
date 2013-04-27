@@ -32,7 +32,7 @@ public class CharacterSelection : MonoBehaviour {
 	private Vector3[] dynamicSpawnPoints; 
 	#endregion
   private GameObject localSelectedCharacter;
-  private GameObject instantedCharacter;
+  private GameObject instancedCharacter;
   public Transform tempSpawnPoint;
 	
 	void Start() {
@@ -56,7 +56,9 @@ public class CharacterSelection : MonoBehaviour {
 		// Get character icons for GUI
 		for(int i=0; i<characters.Length; ++i) {
 			CharacterData charData = characters[i].GetComponent<CharacterData>();
-			textures[i] = charData.icon;
+      Debug.Log(characters[i].name);
+      Debug.Log("charData at " + i + " == null -> " + charData == null);
+			textures[i] = (charData.icon != null ? charData.icon : null);
 			if(textures[i] == null) {
 				textures[i] = Resources.Load(defaultIcon, typeof(Texture2D)) as Texture2D;
 			}
@@ -117,12 +119,14 @@ public class CharacterSelection : MonoBehaviour {
         if (GUILayout.Button(character, GUILayout.Width(iconSize), GUILayout.Height(iconSize))) {
           Debug.Log("Selected: " + current.name);
           localSelectedCharacter = characters[i*cols+j];
-          Network.Destroy (instantedCharacter.gameObject);
-          instantedCharacter = Network.Instantiate(characters[i*cols+j], tempSpawnPoint.position, tempSpawnPoint.rotation, 0) as GameObject;
+          Network.Destroy (instancedCharacter);
+          instancedCharacter = Network.Instantiate(characters[i*cols+j], tempSpawnPoint.position, tempSpawnPoint.rotation, 0) as GameObject;
           isSelecting = false;
 
           LobbyManager lobby = GameObject.FindObjectOfType(typeof(LobbyManager)) as LobbyManager;
           lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
+          CharacterSpawnData data = GameObject.FindObjectOfType(typeof(CharacterSpawnData)) as CharacterSpawnData;
+          data.SelectCharacter(current);
         }
 
         GUILayout.FlexibleSpace();

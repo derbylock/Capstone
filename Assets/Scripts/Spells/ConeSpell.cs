@@ -11,6 +11,7 @@ public class ConeSpell : Spell {
 	private List<GameObject> m_targets = new List<GameObject>();
 	
 	public override void Cast (Vector3 castFrom, Vector3 castTo) {
+    base.Cast (castFrom, castTo);
     transform.position = castFrom;
 
 		if(m_activationEffect) {
@@ -33,7 +34,6 @@ public class ConeSpell : Spell {
 			
 			for(int i=0; i<hits.Length; i++) {
 				if(hits[i].transform.root != m_myCaster && IsInAngle(hits[i].transform)) {
-					Debug.Log ("Hit Dat -> " + hits[i].transform.root.name);
 					m_targets.Add(hits[i].transform.root.gameObject);
 				}
 			}

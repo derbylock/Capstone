@@ -10,6 +10,8 @@ public class BlastSpell : Spell {
 	private List<GameObject> m_targets = new List<GameObject>();
 	
 	public override void Cast (Vector3 castFrom, Vector3 castTo) {
+    base.Cast (castFrom, castTo);
+    
 		Network.Instantiate(m_activationEffect, m_myCaster.position, m_myCaster.rotation, 0);
 		
 		FindTargets();

@@ -57,6 +57,17 @@ public class PlayerManager : MonoBehaviour {
     }
   }
   
+  public void SetAvatar(NetworkPlayer player, GameObject avatar) {
+    PlayerData data = FindPlayerData(player);
+    data.avatar = avatar;
+    data.health = avatar.AddComponent<HealthRework>();
+    data.health.SetHealth(Constants.RSC_HEALTH_DEFAULT);
+    data.mana = avatar.AddComponent<ManaRework>();
+    data.mana.SetMana(Constants.RSC_MANA_DEFAULT);
+    data.mana.SetCurrentMana(Constants.RSC_MANA_DEFAULT);
+    data.mana.SetRegenRate(Constants.RSC_MANA_REGEN_DEFAULT);
+  }
+  
   PlayerData FindPlayerData(NetworkPlayer player) {
     for (int i = 0; i < activePlayers.Count; ++i) {
       if (activePlayers[i].Equals(player)) {

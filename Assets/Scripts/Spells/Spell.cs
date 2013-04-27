@@ -50,14 +50,21 @@ public class Spell : MonoBehaviour {
 	public Transform m_myCaster;
 	private PlayerContainer[] enemies;
 	private PlayerContainer[] allies;
-	
+
+  protected SpellBundle bundle;
+
+  void Awake() {
+    bundle = new SpellBundle();
+    bundle.rootSpell = this;
+  }
+
 	void Start() {
 		// Shut this script down if it's on a client
 		if(!Network.isServer) {
 			this.enabled = false;
 		}
 		
-		// If this spell applies buffs, then find out which ones.
+		/*// If this spell applies buffs, then find out which ones.
 		bool appliesBuffs = false;
 		//foreach(EffectType e in m_effects) {
 			//if(e == EffectType.APPLY_BUFF) {
@@ -80,7 +87,7 @@ public class Spell : MonoBehaviour {
 			m_buffs = tempBuffs.ToArray();
 		} else {
 			m_buffs = null;
-		}
+		}*/
 	}
 	
 	void Update() {
@@ -107,7 +114,8 @@ public class Spell : MonoBehaviour {
 	}
 	
 	public virtual void Cast(Vector3 castFrom, Vector3 castTo) {
-		// Intentionally Blank
+		bundle.startPoint = castFrom;
+    bundle.endPoint = castTo;
 	}
 	
   // Used to determine beforehand if a spell will actually be cast.
@@ -255,4 +263,9 @@ public class Spell : MonoBehaviour {
 			return null;
 		};
 	}
+
+  public void SetCaster(Transform caster) {
+    m_myCaster = caster;
+    bundle.caster = caster.gameObject;
+  }
 }

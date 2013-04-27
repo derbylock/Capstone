@@ -7,6 +7,7 @@ public class CameraController : MonoBehaviour {
   public float vSpeed = 300f;
   public float vMinAngle = -80f;
   public float vMaxAngle = 80f;
+  public float sensitivity = 0.3f;
   
   float maxCameraDistance = 1f;
   
@@ -42,8 +43,8 @@ public class CameraController : MonoBehaviour {
     
     float previousAimDistance = (aimTarget.position - transform.position).magnitude;
     
-    hAngle += Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1) * hSpeed * Time.deltaTime;
-    vAngle += Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1) * vSpeed * Time.deltaTime;
+    hAngle += Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1) * hSpeed * sensitivity * Time.deltaTime;
+    vAngle += Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1) * vSpeed * sensitivity * Time.deltaTime;
     vAngle = Mathf.Clamp(vAngle, vMinAngle, vMaxAngle);
     
     Quaternion cameraRotation = Quaternion.Euler(-vAngle, hAngle, 0f); // Needed later as well
@@ -82,7 +83,6 @@ public class CameraController : MonoBehaviour {
 		
     if(rotateTarget) {
       player.root.rotation = Quaternion.Euler(new Vector3(0.0f, transform.rotation.eulerAngles.y, 0.0f));
-			Debug.Log ("Rotating Target");
     }
   }
   

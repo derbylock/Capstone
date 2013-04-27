@@ -49,7 +49,6 @@ public class LobbyManager : MonoBehaviour {
 
         //if (InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
         if(Input.GetKeyDown(KeyCode.Alpha0)) {
-          Debug.Log("Working");
           UpdateServerWithMove(Network.player, Constants.TEAM_NEUTRAL);
         } else if(Input.GetKeyDown(KeyCode.Alpha1)) { //if (InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
           UpdateServerWithMove(Network.player, Constants.TEAM_ONE);
@@ -57,15 +56,23 @@ public class LobbyManager : MonoBehaviour {
           UpdateServerWithMove(Network.player, Constants.TEAM_TWO);
         }
       }
+      
+      if(playersReady == Network.connections.Length+1) {
+        NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
+        loader.LoadLevel(RandomLevelPicker.RandomizedLevel());
+      }
     }
 
     // Handle input (even for the server)
     if(InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
       networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_NEUTRAL);
+      Debug.Log("Sending Update");
     } else if(InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
       networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_ONE);
+      Debug.Log("Sending Update");
     } else if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
       networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_TWO);
+      Debug.Log("Sending Update");
     }
 
     if(localCanReady && InputReader.GetKeysDownOr(KeyCode.Return, KeyCode.KeypadEnter)) {
@@ -98,12 +105,16 @@ public class LobbyManager : MonoBehaviour {
 
   [RPC]
   void UpdateServerWithMove(NetworkPlayer mover, int team) {
+    Debug.Log("Received Move Request");
     NetworkPlayerBundle bundle = GetPlayerBundle(mover);
     if (!bundle.ready) {
+      Debug.Log("Player Not Ready (GOOD)");
       if (team == Constants.TEAM_NEUTRAL) {
+        Debug.Log("Setting to neutral team");
         IncrementTeam(bundle.team, -1);
         bundle.team = team;
       } else if (IsTeamJoinable(team)) {
+        Debug.Log("Team is joinable...");
         IncrementTeam(bundle.team, -1);
         bundle.team = team;
         IncrementTeam(team, 1);
@@ -111,18 +122,25 @@ public class LobbyManager : MonoBehaviour {
       networkView.RPC("UpdateClient", RPCMode.Others, bundle.player, bundle.team, bundle.ready);
 
       if (CanReady(mover)) {
-        if (Network.isServer) {
+        Debug.Log("Can Ready is true...");
+        Debug.Log("Mover is server? ");
+        if (mover == Network.player) {
           SetCanReady(true);
         } else {
+          Debug.Log("Sending SetCanReady to Client");
           networkView.RPC("SetCanReady", mover, true);
         }
       } else {
+        Debug.Log("Sending Bad Result");
         if (Network.isServer) {
+          Debug.Log("Sending CanReady to the server....wat");
           SetCanReady(false);
         } else {
           networkView.RPC("SetCanReady", mover, false);
         }
       }
+    } else {
+      Debug.Log("Bundle somehow ready....");
     }
   }
 
@@ -156,6 +174,7 @@ public class LobbyManager : MonoBehaviour {
 
   [RPC]
   void ReadyCheck(NetworkPlayer me, bool ready) {
+    Debug.Log("Received Ready Check from player " + me);
     bool changeMade = false;
     NetworkPlayerBundle bundle = GetPlayerBundle(me);
     if (ready && (bundle.team == Constants.TEAM_ONE || bundle.team == Constants.TEAM_TWO)) {

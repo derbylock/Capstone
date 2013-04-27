@@ -8,7 +8,17 @@ public class SpellSpecial : MonoBehaviour {
   public bool runOnce;
   protected bool hasRun;
 
-  public void Activate() {
+  protected SpellBundle bundle;
+
+  public void Activate(SpellBundle bundle) {
     activated = true;
+    this.bundle = bundle;
   }
+
+  //private GameObject[] targets;
+
+  /*public void Activate(params GameObject[] targets) {
+    activated = true;
+    this.targets = targets;
+  }*/
 }

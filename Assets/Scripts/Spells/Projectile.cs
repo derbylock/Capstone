@@ -20,7 +20,7 @@ public class Projectile : Spell {
 	}
 	
 	public override void Cast(Vector3 castFrom, Vector3 castTo) {
-    Debug.Log("Cast Success");
+    base.Cast (castFrom, castTo);
 		// Get direction vector
 		direction = Vector3.Normalize(castTo-transform.position);
 		// Begin moving
@@ -82,6 +82,12 @@ public class Projectile : Spell {
 		if(networkView.isMine) {
 			if(particleSystem) {
 				particleSystem.enableEmission = false;
+
+        LightFader fader = gameObject.GetComponent<LightFader>();
+        if (fader != null) {
+          Debug.Log("Beginning Fader");
+          fader.BeginFade();
+        }
 				yield return new WaitForSeconds(particleSystem.startLifetime);
 				Network.Destroy(transform.root.gameObject);
 			} else {

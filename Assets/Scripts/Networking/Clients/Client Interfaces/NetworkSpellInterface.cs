@@ -104,7 +104,8 @@ public class NetworkSpellInterface : MonoBehaviour {
       if (spellScript.handLatch) {
         spellScript.latchingJoint = handJoint;
       }
-      spellScript.m_myCaster = transform.root;
+      //spellScript.m_myCaster = transform.root;
+      spellScript.SetCaster(transform.root);
       spellScript.Cast(spawnPosition, castTo);
 
       if (spellScript.GetType() == typeof(RuneSpell)) {
