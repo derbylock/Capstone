@@ -11,6 +11,9 @@ public class NetworkAnimation : MonoBehaviour {
 	 * run m_anims loop and death m_anims never end.
 	 *************************************************************************/
 	void Start() {
+    if (!animation) {
+      return;
+    }
 		for(int i=0; i<m_anims.Length; i++) {
 			animation[m_anims[i].animationName].wrapMode = m_anims[i].animationWrapping;
 			if(m_anims[i].animationRootTransform) {

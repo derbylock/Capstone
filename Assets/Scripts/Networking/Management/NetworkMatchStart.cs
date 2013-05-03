@@ -7,21 +7,28 @@ public class NetworkMatchStart : MonoBehaviour {
 	private bool matchFull = false;
 	private bool sequenceComplete = false;
 
+  private bool started;
+
 	// Use this for initialization
 	void Start () {
 		countdown.guiText.enabled = false;
 	}
+
+  public void Begin() {
+    started = true;
+  }
 	
 	// Update is called once per frame
 	void Update () {
 		//if(!matchFull) { Debug.Log ("Still Waiting"); }
 		if(Network.isServer) {
 			if(!matchFull && Network.connections.Length >= 1) {
+      //if(started) {
 				Debug.Log ("Working");
 				matchFull = true;
 				
-				GameObject playerManager = GameObject.Find ("Player Data Manager");
-				PlayerDataManager manager = playerManager.GetComponent<PlayerDataManager>();
+				//GameObject playerManager = GameObject.Find ("Player Data Manager");
+				//PlayerDataManager manager = playerManager.GetComponent<PlayerDataManager>();
 				//manager.InitializeTeamHealth();
 				
 				StartCoroutine("SetPlayersReady");

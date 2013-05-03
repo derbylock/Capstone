@@ -20,9 +20,13 @@ public class PlayerController : MonoBehaviour {
   private CharacterController controller;
   private Vector3 groundNormal = Vector3.zero;
 
+  private Animator animator;
+
 
   void Start() {
     controller = gameObject.GetComponent<CharacterController>();
+    animator = transform.GetComponent<Animator>();
+    Debug.Log("Animator found: " + animator != null);
   }
 
   void Update() {
@@ -36,15 +40,22 @@ public class PlayerController : MonoBehaviour {
       inputTrajectory = new Vector3(Input.GetAxis("Horizontal"),
                                             0f,
                                             Input.GetAxis("Vertical"));
+      Vector3 input = inputTrajectory.normalized;
       inputTrajectory = transform.TransformDirection(inputTrajectory);
       inputTrajectory.Normalize();
+
+      //-------------------Animator Fun Hack-------------------
+      animator.SetFloat("Strafe", input.x);
+      animator.SetFloat("Straight", input.z);
+      animator.SetFloat("Magnitude", input.magnitude);
+      //-------------------------------------------------------
 
       // Get grounded state and store airborn values if not
       isGrounded = controller.isGrounded;
       if (!isGrounded && wasGrounded) {
         airbornStartTime = Time.time;
         airbornTrajectory = inputTrajectory;
-        Debug.Log("In the wrong part of town");
+        //Debug.Log("In the wrong part of town");
       }
 
       // Handled grounded vs not grounded control handling
@@ -78,11 +89,15 @@ public class PlayerController : MonoBehaviour {
       Vector3 drag = airbornTrajectory * airDrag;
       drag.y = 0f;
       movementDirection -= drag;
-      Debug.Log(drag);
+      //Debug.Log(drag);
       movementDirection.y -= gravity * airbornTime * airbornTime;
     } else if (isGrounded && !isJumping) {
       movementDirection.y -= gravity;
     }
+
+    animator.SetBool("IsJumping", isJumping);
+    animator.SetBool("IsFalling", !isGrounded);
+    
 
     movementDirection *= Time.deltaTime;
     controller.Move(movementDirection);

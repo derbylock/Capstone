@@ -28,9 +28,9 @@ public class LobbyManager : MonoBehaviour {
 
   public List<NetworkPlayerBundle> playerTeams = new List<NetworkPlayerBundle>();
 
-  void Awake() {
+  /*void Awake() {
     DontDestroyOnLoad(gameObject);
-  }
+  }*/
 
   void Start() {
     if(Network.isServer) {
@@ -41,57 +41,42 @@ public class LobbyManager : MonoBehaviour {
   }
 
   void Update() {
-    if(Network.isServer) {
-//      Debug.Log(playersReady);
-      if(playersReady == Network.connections.Length+1) {
-        NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
-        loader.networkView.RPC("LoadLevel", RPCMode.All, matchLevelName);
-
-        //if (InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
-        if(Input.GetKeyDown(KeyCode.Alpha0)) {
-          UpdateServerWithMove(Network.player, Constants.TEAM_NEUTRAL);
-        } else if(Input.GetKeyDown(KeyCode.Alpha1)) { //if (InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
-          UpdateServerWithMove(Network.player, Constants.TEAM_ONE);
-        } else if(Input.GetKeyDown(KeyCode.Alpha2)) { //if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
-          UpdateServerWithMove(Network.player, Constants.TEAM_TWO);
-        }
+    if (Network.isServer) {
+      Debug.Log(playersReady + "/" + (Network.connections.Length+1));
+      if (playersReady == Network.connections.Length + 1) {
+        MigrateToMatch();
+        /*NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
+        loader.networkView.RPC("LoadLevel", RPCMode.All, RandomLevelPicker.RandomizedLevel());//matchLevelName);*/
       }
-      
-      if(playersReady == Network.connections.Length+1) {
-        NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
-        loader.LoadLevel(RandomLevelPicker.RandomizedLevel());
-      }
-    }
 
-    // Handle input (even for the server)
-    if(InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
-      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_NEUTRAL);
-      Debug.Log("Sending Update");
-    } else if(InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
-      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_ONE);
-      Debug.Log("Sending Update");
-    } else if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
-      networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_TWO);
-      Debug.Log("Sending Update");
+      if (Input.GetKeyDown(KeyCode.Alpha0)) {
+        UpdateServerWithMove(Network.player, Constants.TEAM_NEUTRAL);
+      } else if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        UpdateServerWithMove(Network.player, Constants.TEAM_ONE);
+      } else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+        UpdateServerWithMove(Network.player, Constants.TEAM_TWO);
+      }
+    } else {
+      // Handle input (even for the server)
+      if (InputReader.GetKeysDownOr(KeyCode.Alpha0, KeyCode.Keypad0)) {
+        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_NEUTRAL);
+        Debug.Log("Sending Update");
+      } else if (InputReader.GetKeysDownOr(KeyCode.Alpha1, KeyCode.Keypad1)) {
+        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_ONE);
+        Debug.Log("Sending Update");
+      } else if (InputReader.GetKeysDownOr(KeyCode.Alpha2, KeyCode.Keypad2)) {
+        networkView.RPC("UpdateServerWithMove", RPCMode.Server, Network.player, Constants.TEAM_TWO);
+        Debug.Log("Sending Update");
+      }
     }
 
     if(localCanReady && InputReader.GetKeysDownOr(KeyCode.Return, KeyCode.KeypadEnter)) {
-      /*if (Network.isServer) {
-        ReadyCheck(Network.player, true);
-      } else {
-        networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
-      }*/
       localReady = true;
       CharacterSelection select = GameObject.FindObjectOfType(typeof(CharacterSelection)) as CharacterSelection;
       select.isWaiting = false;
     }
     
     if (InputReader.GetKeysDownOr(KeyCode.Backspace, KeyCode.Delete)) {
-      /*if (Network.isServer) {
-        ReadyCheck(Network.player, false);
-      } else {
-        networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, false);
-      }*/
       localReady = false;
       CharacterSelection select = GameObject.FindObjectOfType(typeof(CharacterSelection)) as CharacterSelection;
       select.isWaiting = true;
@@ -105,16 +90,12 @@ public class LobbyManager : MonoBehaviour {
 
   [RPC]
   void UpdateServerWithMove(NetworkPlayer mover, int team) {
-    Debug.Log("Received Move Request");
     NetworkPlayerBundle bundle = GetPlayerBundle(mover);
     if (!bundle.ready) {
-      Debug.Log("Player Not Ready (GOOD)");
       if (team == Constants.TEAM_NEUTRAL) {
-        Debug.Log("Setting to neutral team");
         IncrementTeam(bundle.team, -1);
         bundle.team = team;
       } else if (IsTeamJoinable(team)) {
-        Debug.Log("Team is joinable...");
         IncrementTeam(bundle.team, -1);
         bundle.team = team;
         IncrementTeam(team, 1);
@@ -122,18 +103,13 @@ public class LobbyManager : MonoBehaviour {
       networkView.RPC("UpdateClient", RPCMode.Others, bundle.player, bundle.team, bundle.ready);
 
       if (CanReady(mover)) {
-        Debug.Log("Can Ready is true...");
-        Debug.Log("Mover is server? ");
         if (mover == Network.player) {
           SetCanReady(true);
         } else {
-          Debug.Log("Sending SetCanReady to Client");
           networkView.RPC("SetCanReady", mover, true);
         }
       } else {
-        Debug.Log("Sending Bad Result");
         if (Network.isServer) {
-          Debug.Log("Sending CanReady to the server....wat");
           SetCanReady(false);
         } else {
           networkView.RPC("SetCanReady", mover, false);
@@ -173,19 +149,23 @@ public class LobbyManager : MonoBehaviour {
   }
 
   [RPC]
-  void ReadyCheck(NetworkPlayer me, bool ready) {
+  public void ReadyCheck(NetworkPlayer me, bool ready) {
     Debug.Log("Received Ready Check from player " + me);
     bool changeMade = false;
     NetworkPlayerBundle bundle = GetPlayerBundle(me);
-    if (ready && (bundle.team == Constants.TEAM_ONE || bundle.team == Constants.TEAM_TWO)) {
-      changeMade = true;
-      bundle.ready = true;
-      ++playersReady;
+    if (!bundle.ready) {
+      if (ready && (bundle.team == Constants.TEAM_ONE || bundle.team == Constants.TEAM_TWO)) {
+        changeMade = true;
+        bundle.ready = true;
+        ++playersReady;
+      }
     }
-    if(!ready) {
-      changeMade = true;
-      bundle.ready = false;
-      --playersReady;
+    if (bundle.ready) {
+      if (!ready) {
+        changeMade = true;
+        bundle.ready = false;
+        --playersReady;
+      }
     }
 
     if (changeMade) {
@@ -204,11 +184,13 @@ public class LobbyManager : MonoBehaviour {
 
   bool IsTeamJoinable(int team) {
     if(team == Constants.TEAM_ONE && playersOnTeamOne <= playersOnTeamTwo) {
-      Debug.Log(playersOnTeamOne + " <= " + playersOnTeamTwo);
+      Debug.Log("Choosing team 0");
+      Debug.Log("Team 0: " + playersOnTeamOne + " Team 1: " + playersOnTeamTwo);
       return true;
     }
     if (team == Constants.TEAM_TWO && playersOnTeamTwo <= playersOnTeamOne) {
-      Debug.Log(playersOnTeamTwo + " <= " + playersOnTeamOne);
+      Debug.Log("Choosing team 1");
+      Debug.Log("Team 0: " + playersOnTeamOne + " Team 1: " + playersOnTeamTwo);
       return true;
     }
     return false;
@@ -221,6 +203,26 @@ public class LobbyManager : MonoBehaviour {
     if (team == Constants.TEAM_TWO) {
       playersOnTeamTwo += amount;
     }
+  }
+
+  void MigrateToMatch() {
+    // Export teams to the Persistent Team Data so they can be rebuilt in the match scene.
+    PersistentTeamData teamData = GameObject.FindObjectOfType(typeof(PersistentTeamData)) as PersistentTeamData;
+    List<NetworkPlayer> t1 = new List<NetworkPlayer>();
+    List<NetworkPlayer> t2 = new List<NetworkPlayer>();
+    for (int i = 0; i < playerTeams.Count; ++i) {
+      if (playerTeams[i].team == Constants.TEAM_ONE) {
+        t1.Add(playerTeams[i].player);
+      }
+      if (playerTeams[i].team == Constants.TEAM_TWO) {
+        t2.Add(playerTeams[i].player);
+      }
+    }
+    teamData.FillTeams(t1.ToArray(), t2.ToArray());
+
+    // Load a random map
+    NetworkLevelLoader loader = GameObject.FindObjectOfType(typeof(NetworkLevelLoader)) as NetworkLevelLoader;
+    loader.networkView.RPC("LoadLevel", RPCMode.All, RandomLevelPicker.RandomizedLevel());
   }
 
   // OnGUI is only for testing purposes

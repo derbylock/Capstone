@@ -94,7 +94,12 @@ public class CharacterSelection : MonoBehaviour {
                       "Select Character")) {
           isSelecting = true;
           LobbyManager lobby = GameObject.FindObjectOfType(typeof(LobbyManager)) as LobbyManager;
-          lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, false);
+
+          if (Network.isServer) {
+            lobby.ReadyCheck(Network.player, false);
+          } else {
+            lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, false);
+          }
         }
       }
     }
@@ -124,7 +129,11 @@ public class CharacterSelection : MonoBehaviour {
           isSelecting = false;
 
           LobbyManager lobby = GameObject.FindObjectOfType(typeof(LobbyManager)) as LobbyManager;
-          lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
+          if (Network.isServer) {
+            lobby.ReadyCheck(Network.player, true);
+          } else {
+            lobby.networkView.RPC("ReadyCheck", RPCMode.Server, Network.player, true);
+          }
           CharacterSpawnData data = GameObject.FindObjectOfType(typeof(CharacterSpawnData)) as CharacterSpawnData;
           data.SelectCharacter(current);
         }

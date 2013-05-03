@@ -16,6 +16,7 @@
 
   public const int WINID_CHAR_SELECT = 1;
   public const int WINID_DEV_MOUSE_SENS = 2;
+  public const int WINID_DEV_DEBUG = 3;
 
   public const float MIN_RECAST_TIME = 0.2f;
 
@@ -23,6 +24,6 @@
     return (target & flag) == flag;
   }
   
-  public static string[] PLAYABLE_LEVELS = {  "MP_Dungeon",
+  public static string[] PLAYABLE_LEVELS = {  "DungeonTest",
                                               "MP_TestLevel"  };
 }

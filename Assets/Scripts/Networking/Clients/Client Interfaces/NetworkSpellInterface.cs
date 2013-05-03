@@ -29,11 +29,14 @@ public class NetworkSpellInterface : MonoBehaviour {
   public GameObject[] spells;
   public Transform handJoint;
 
+  private Animator animator;
+
   public int myTeam = -1;
   void Start() {
     if (!networkView.isMine) {
       this.enabled = false;
     }
+    animator = transform.GetComponent<Animator>();
     myCamera = GameObject.FindGameObjectWithTag("Follow Camera");
   }
 
@@ -46,24 +49,30 @@ public class NetworkSpellInterface : MonoBehaviour {
         } else {
           networkView.RPC("CastSpell", RPCMode.Server, Network.player, 0, myTeam, GetCastEndpoint());
         }
+        animator.SetBool("IsAttacking", true);
       } else if (Input.GetKeyDown(secondaryAttack)) {
         if (Network.isServer) {
           ServerCastSpell(1);
         } else {
           networkView.RPC("CastSpell", RPCMode.Server, Network.player, 1, myTeam, GetCastEndpoint());
         }
+        animator.SetBool("IsAttacking", true);
       } else if (Input.GetKeyDown(specialAttack)) {
         if (Network.isServer) {
           ServerCastSpell(2);
         } else {
           networkView.RPC("CastSpell", RPCMode.Server, Network.player, 2, myTeam, GetCastEndpoint());
         }
+        animator.SetBool("IsAttacking", true);
       } else if (Input.GetKeyDown(fourthAttack)) {
         if (Network.isServer) {
           ServerCastSpell(3);
         } else {
           networkView.RPC("CastSpell", RPCMode.Server, Network.player, 3, myTeam, GetCastEndpoint());
         }
+        animator.SetBool("IsAttacking", true);
+      } else {
+        animator.SetBool("IsAttacking", false);
       }
     }
   }
