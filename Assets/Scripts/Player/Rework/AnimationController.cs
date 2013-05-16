@@ -8,28 +8,12 @@ public class AnimationController : MonoBehaviour {
 
   public Animator animator;
 
-  void Awake() {
-
-  }
-
   void Start() {
     animator = gameObject.GetComponent<Animator>();
   }
 
   void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
-    Vector3 dir = Vector3.zero;
-    bool jump = false;
-    bool air = false;
-    bool attack = false;
     if (stream.isWriting && networkView.owner == Network.player) {
-      /*dir = direction;
-      jump = isJumping;
-      air = isAirborn;
-      attack = isAttacking;
-      stream.Serialize(ref dir);
-      stream.Serialize(ref jump);
-      stream.Serialize(ref air);
-      stream.Serialize(ref attack);*/
       stream.Serialize(ref direction);
       stream.Serialize(ref isJumping);
       stream.Serialize(ref isAirborn);
@@ -39,14 +23,6 @@ public class AnimationController : MonoBehaviour {
       stream.Serialize(ref isJumping);
       stream.Serialize(ref isAirborn);
       stream.Serialize(ref isAttacking);
-      /*stream.Serialize(ref dir);
-      stream.Serialize(ref jump);
-      stream.Serialize(ref air);
-      stream.Serialize(ref attack);
-      direction = dir;
-      isJumping = jump;
-      isAirborn = air;
-      isAttacking = attack;*/
     }
   }
 

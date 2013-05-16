@@ -18,7 +18,9 @@ public class TargettedSpell : Spell {
     RaycastHit hit;
 
     if (Physics.Raycast(castFrom, (castTo - castFrom).normalized, out hit, m_maxDistance)) {
-      if (hit.transform.root.tag == "Player") {
+      if (requirePlayerHit && hit.transform.root.tag == "Player") {
+        bundle.hitTarget = hit.transform.root.gameObject;
+      } else {
         bundle.hitTarget = hit.transform.root.gameObject;
       }
 

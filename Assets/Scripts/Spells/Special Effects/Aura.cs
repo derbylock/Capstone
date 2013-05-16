@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Reflection;
 
-public class Aura : MonoBehaviour {
+public class Aura : SpellSpecial {
   public enum AuraType {
+    AddEffect,
     DirectDamage,
     DamageOverTime,
     Heal,
@@ -38,6 +39,11 @@ public class Aura : MonoBehaviour {
     if(initialDelay == 0f) {
       applyMethod.Invoke(this, null);
     }
+  }
+  
+  void ApplyAddEffect() {
+    SpellActivator activator = transform.GetComponent<SpellActivator>();
+    activator.Activate(bundle);
   }
 
   void ApplyDirectDamage() {

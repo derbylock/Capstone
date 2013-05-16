@@ -255,14 +255,14 @@ public class PlayerDataManager : MonoBehaviour {
 		
 		newPlayer.m_buffs = newPlayer.m_avatar.GetComponent<BuffContainer>(); //(newPlayer.m_avatar.gameObject.AddComponent<BuffContainer>()) as BuffContainer; // new BuffContainer(); //newPlayer.m_avatar.GetComponent<BuffContainer>();	// Old way
 		newPlayer.m_health = newPlayer.m_avatar.GetComponent<Health>();	 //(newPlayer.m_avatar.gameObject.AddComponent<Health>()) as Health; //new Health(); //newPlayer.m_avatar.GetComponent<Health>();			// Old way
-		newPlayer.m_health.SetHealth(DEFAULT_HEALTH);
+		newPlayer.m_health.SetHealth(Constants.RSC_HEALTH_DEFAULT);
 		Debug.Log ("Player health set: " + newPlayer.m_health.maxHealth);
 		Debug.Log ("New player IP: " + newPlayer.m_player.ipAddress);
 		Debug.Log ("New player model exists: " + newPlayer.m_avatar);
 		
 		newPlayer.m_mana = new Mana();
-		newPlayer.m_mana.SetMana(DEFAULT_MANA);
-		newPlayer.m_mana.SetRegenRate(DEFAULT_MANA_REGEN);
+		newPlayer.m_mana.SetMana(Constants.RSC_MANA_DEFAULT);
+		newPlayer.m_mana.SetRegenRate(Constants.RSC_MANA_REGEN_DEFAULT);
 		
 		// Temporarily decide teams based on join order
 		if(m_teamOne == null || m_teamOne.Length<=0) {
@@ -274,7 +274,7 @@ public class PlayerDataManager : MonoBehaviour {
 		if(playerCount%2 == 0) {
 			m_teamOne[playerCount/2] = newPlayer;
 			spells.myTeam = 0;
-			m_playerValuePool.networkView.RPC("AddPlayer", RPCMode.AllBuffered, 0, player, newPlayer.m_health.Percentage, DEFAULT_MANA, DEFAULT_MANA_REGEN);
+			m_playerValuePool.networkView.RPC("AddPlayer", RPCMode.AllBuffered, 0, player, newPlayer.m_health.Percentage, Constants.RSC_MANA_DEFAULT, Constants.RSC_MANA_REGEN_DEFAULT);
 			
 			// Set the team of the player so that we have that data available for
 			// the spells to make quick decisions for valid targets
@@ -282,7 +282,7 @@ public class PlayerDataManager : MonoBehaviour {
 		} else {
 			m_teamTwo[playerCount/2] = newPlayer;
 			spells.myTeam = 1;
-			m_playerValuePool.networkView.RPC("AddPlayer", RPCMode.AllBuffered, 1, player, newPlayer.m_health.Percentage, DEFAULT_MANA, DEFAULT_MANA_REGEN);
+      m_playerValuePool.networkView.RPC("AddPlayer", RPCMode.AllBuffered, 1, player, newPlayer.m_health.Percentage, Constants.RSC_MANA_DEFAULT, Constants.RSC_MANA_REGEN_DEFAULT);
 			
 			// Set the team of the player so that we have that data available for
 			// the spells to make quick decisions for valid targets

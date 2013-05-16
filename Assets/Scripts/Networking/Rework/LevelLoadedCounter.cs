@@ -16,7 +16,6 @@ public class LevelLoadedCounter : MonoBehaviour {
   }*/
   
 	void Update () {
-    Debug.Log("I'm running, I swear");
 	  if(loaded.Count == Network.connections.Length) {
       Debug.Log("All players reported in");
       Type type = Type.GetType(scriptToAlert);

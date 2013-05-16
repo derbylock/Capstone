@@ -22,18 +22,20 @@ public class NetworkMatchStart : MonoBehaviour {
 	void Update () {
 		//if(!matchFull) { Debug.Log ("Still Waiting"); }
 		if(Network.isServer) {
+      GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 			if(!matchFull && Network.connections.Length >= 1) {
-      //if(started) {
-				Debug.Log ("Working");
-				matchFull = true;
-				
-				//GameObject playerManager = GameObject.Find ("Player Data Manager");
-				//PlayerDataManager manager = playerManager.GetComponent<PlayerDataManager>();
-				//manager.InitializeTeamHealth();
-				
-				StartCoroutine("SetPlayersReady");
-				
-				networkView.RPC("BeginStartSequence", RPCMode.All);
+        if(players.Length == (Network.connections.Length + 1)) {
+          Debug.Log ("Working");
+          matchFull = true;
+          
+          //GameObject playerManager = GameObject.Find ("Player Data Manager");
+          //PlayerDataManager manager = playerManager.GetComponent<PlayerDataManager>();
+          //manager.InitializeTeamHealth();
+          
+          StartCoroutine("SetPlayersReady");
+          
+          networkView.RPC("BeginStartSequence", RPCMode.All);
+        }
 			}
 			
 			if(sequenceComplete) {
@@ -77,6 +79,9 @@ public class NetworkMatchStart : MonoBehaviour {
 			if(player.networkView.isMine) {
 				PlayerController controller = player.GetComponent<PlayerController>();
 				controller.UnlockPlayer();
+
+        NetworkSpellInterface inter = player.GetComponent<NetworkSpellInterface>();
+        inter.enabled = true;
 				break;
 			}
 		}

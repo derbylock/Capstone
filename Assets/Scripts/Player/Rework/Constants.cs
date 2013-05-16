@@ -12,7 +12,7 @@
   public const int RSC_UPDATE_REGEN_RATE = 0x4;
   public const float RSC_HEALTH_DEFAULT = 1000f;
   public const float RSC_MANA_DEFAULT = 500f;
-  public const float RSC_MANA_REGEN_DEFAULT = 60f;
+  public const float RSC_MANA_REGEN_DEFAULT = 45f;
 
   public const int WINID_CHAR_SELECT = 1;
   public const int WINID_DEV_MOUSE_SENS = 2;

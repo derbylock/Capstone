@@ -267,5 +267,7 @@ public class Spell : MonoBehaviour {
   public void SetCaster(Transform caster) {
     m_myCaster = caster;
     bundle.caster = caster.gameObject;
+    Team team = caster.GetComponent<Team>();
+    bundle.team = team.m_teamNumber;
   }
 }

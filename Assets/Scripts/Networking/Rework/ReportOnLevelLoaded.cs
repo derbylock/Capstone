@@ -8,6 +8,7 @@ public class ReportOnLevelLoaded : MonoBehaviour {
   ConsoleDebug debug;
   
 	void Start () {
+    networkView.viewID = Network.AllocateViewID();
     debug = GameObject.FindObjectOfType(typeof(ConsoleDebug)) as ConsoleDebug;
     if (Network.isClient) {
       StartCoroutine("BeginReport");

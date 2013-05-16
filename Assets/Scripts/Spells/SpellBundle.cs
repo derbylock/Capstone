@@ -7,6 +7,7 @@ public class SpellBundle {
   public Vector3 endPoint;
   public GameObject hitTarget;
   public GameObject[] allTargets;
+  public int team;
 
   public Vector3 GetFarthestPoint() {
     int mask = 1 << LayerMask.NameToLayer("Player");
@@ -20,6 +21,24 @@ public class SpellBundle {
       temp = hit.point;
     } else {
       temp = startPoint + direction * rootSpell.m_maxDistance;
+    }
+    return temp;
+  }
+
+  public Vector3 GetFarthestPoint(out Vector3 normal) {
+    int mask = 1 << LayerMask.NameToLayer("Player");
+    mask |= 1 << LayerMask.NameToLayer("Ignore Raycast");
+    mask = ~mask;
+
+    Vector3 temp;
+    Vector3 direction = (endPoint - startPoint).normalized;
+    RaycastHit hit;
+    if (Physics.Raycast(startPoint, direction, out hit, rootSpell.m_maxDistance, mask)) {
+      temp = hit.point;
+      normal = hit.normal;
+    } else {
+      temp = startPoint + direction * rootSpell.m_maxDistance;
+      normal = Vector3.zero;
     }
     return temp;
   }
@@ -76,6 +95,39 @@ public class SpellBundle {
 
     if (Physics.Raycast(temp, Vector3.down, out hit, 10000f, mask)) {
       temp = hit.point;
+    }
+    Debug.Log("FarthestGroundedPoint: " + temp);
+    return temp;
+  }
+  
+  public Vector3 GetFarthestPointGrounded(bool collideWithPlayer, out Vector3 normal) {
+    int mask = 0;
+    if (!collideWithPlayer) {
+      mask |= 1 << LayerMask.NameToLayer("Player");
+    }
+    mask |= 1 << LayerMask.NameToLayer("Ignore Raycast");
+    mask = ~mask;
+
+    Vector3 temp;
+    RaycastHit hit;
+
+    if (Vector3.Distance(startPoint, endPoint) > rootSpell.m_maxDistance) {
+      Vector3 direction = (endPoint - startPoint).normalized;
+
+      if (Physics.Raycast(startPoint, direction, out hit, rootSpell.m_maxDistance, mask)) {
+        temp = hit.point;
+      } else {
+        temp = startPoint + direction * rootSpell.m_maxDistance;
+      }
+    } else {
+      temp = endPoint;
+    }
+
+    if (Physics.Raycast(temp, Vector3.down, out hit, 10000f, mask)) {
+      temp = hit.point;
+      normal = hit.normal;
+    } else {
+      normal = Vector3.zero;
     }
     Debug.Log("FarthestGroundedPoint: " + temp);
     return temp;

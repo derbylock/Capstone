@@ -22,14 +22,18 @@ public class Projectile : Spell {
 	public override void Cast(Vector3 castFrom, Vector3 castTo) {
     base.Cast (castFrom, castTo);
 		// Get direction vector
-		direction = Vector3.Normalize(castTo-transform.position);
+		direction = (castTo-transform.position).normalized;
+
+    Quaternion rotation = Quaternion.FromToRotation(new Vector3(0f,0f,1f), direction);
+    Debug.Log(transform.rotation);
+    transform.rotation = rotation;
+
 		// Begin moving
 		StartCoroutine("Move");
-		Debug.Log("Casting Projectile");
 	}
 	
 	IEnumerator Move() {
-    Debug.Log("Moving");
+    
 		currentDistance = 0;
 		while (!activated && currentDistance < maxDistance) {
 			// TODO: Apply logic for aim assist

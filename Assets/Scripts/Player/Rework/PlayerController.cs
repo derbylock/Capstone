@@ -21,12 +21,13 @@ public class PlayerController : MonoBehaviour {
   private Vector3 groundNormal = Vector3.zero;
 
   private Animator animator;
+  private AnimationController anim;
 
 
   void Start() {
     controller = gameObject.GetComponent<CharacterController>();
     animator = transform.GetComponent<Animator>();
-    Debug.Log("Animator found: " + animator != null);
+    anim = transform.GetComponent<AnimationController>();
   }
 
   void Update() {
@@ -45,9 +46,10 @@ public class PlayerController : MonoBehaviour {
       inputTrajectory.Normalize();
 
       //-------------------Animator Fun Hack-------------------
-      animator.SetFloat("Strafe", input.x);
-      animator.SetFloat("Straight", input.z);
-      animator.SetFloat("Magnitude", input.magnitude);
+      //animator.SetFloat("Strafe", input.x);
+      //animator.SetFloat("Straight", input.z);
+      //animator.SetFloat("Magnitude", input.magnitude);
+      anim.direction = input;
       //-------------------------------------------------------
 
       // Get grounded state and store airborn values if not
@@ -95,8 +97,10 @@ public class PlayerController : MonoBehaviour {
       movementDirection.y -= gravity;
     }
 
-    animator.SetBool("IsJumping", isJumping);
-    animator.SetBool("IsFalling", !isGrounded);
+    //animator.SetBool("IsJumping", isJumping);
+    //animator.SetBool("IsFalling", !isGrounded);
+    anim.isJumping = isJumping;
+    anim.isAirborn = !isGrounded;
     
 
     movementDirection *= Time.deltaTime;

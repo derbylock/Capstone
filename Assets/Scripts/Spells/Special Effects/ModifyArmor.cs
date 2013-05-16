@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class ModifyArmor : SpellSpecial {
   public float amount;
@@ -15,10 +16,10 @@ public class ModifyArmor : SpellSpecial {
 
   void Run() {
     bool sameModFound = false;
-    for(int i = 0; i<transform.root.GetChildCount(); ++i) {
-      Transform child = transform.root.GetChild(i);
+    for(int i = 0; i<bundle.hitTarget.transform.GetChildCount() /*transform.root.GetChildCount()*/; ++i) {
+      Transform child = bundle.hitTarget.transform.GetChild(i);
       ModifyArmor modArmor = child.GetComponent<ModifyArmor>();
-      if (modArmor != this && modArmor.amount == this.amount) {
+      if (modArmor != null && modArmor != this && modArmor.spellID == this.spellID) {
         RemoveArmorMod();
          sameModFound = true;
         break;
@@ -26,7 +27,13 @@ public class ModifyArmor : SpellSpecial {
     }
 
     if(!sameModFound) {
+      transform.parent = bundle.hitTarget.transform;
+      transform.localPosition = Vector3.zero;
+      transform.localRotation = Quaternion.identity;
+
       ApplyArmorMod();
+
+      StartCoroutine("BeginDestructTimer");
     } else {
       DestroyAllArmorMods();
     }
@@ -46,13 +53,21 @@ public class ModifyArmor : SpellSpecial {
     if (armor != null) {
       armor.armor -= amount;
     }
+
+    this.transform.parent = null;
+    Destroy(gameObject);
+  }
+
+  IEnumerator BeginDestructTimer() {
+    yield return new WaitForSeconds(duration);
+    RemoveArmorMod();
   }
 
   void DestroyAllArmorMods() {
-    for (int i = 0; i < transform.root.GetChildCount(); ++i) {
-      Transform child = transform.root.GetChild(i);
+    for (int i = 0; i < bundle.hitTarget.transform.GetChildCount(); ++i) {
+      Transform child = bundle.hitTarget.transform.GetChild(i);
       ModifyArmor modArmor = child.GetComponent<ModifyArmor>();
-      if (modArmor != this && modArmor.amount == this.amount) {
+      if (modArmor != null && modArmor != this && modArmor.spellID == this.spellID) {
         child.parent = null;
         Destroy(child.gameObject);
       }

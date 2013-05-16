@@ -12,6 +12,8 @@ public class DevTools: MonoBehaviour {
       Screen.lockCursor = !Screen.lockCursor;
     }
     if(Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R)) {
+      Network.Disconnect();
+      MasterServer.UnregisterHost();
       Application.LoadLevel(0);
     }
 

@@ -20,7 +20,7 @@ public class NetworkInterpolatedTransform : MonoBehaviour {
 	
 	// Set the network view to observe this script
 	void Awake() {
-		networkView.observed = this.GetComponent(typeof(NetworkInterpolatedTransform)) as NetworkInterpolatedTransform;
+		//networkView.observed = this.GetComponent(typeof(NetworkInterpolatedTransform)) as NetworkInterpolatedTransform;
 		
 		for(int i=0; i<m_BufferedState.Length; i++) {
 			m_BufferedState[i].pos = transform.position;

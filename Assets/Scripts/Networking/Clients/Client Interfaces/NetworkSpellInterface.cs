@@ -72,13 +72,15 @@ public class NetworkSpellInterface : MonoBehaviour {
         }
         animator.SetBool("IsAttacking", true);
       } else {
-        animator.SetBool("IsAttacking", false);
+        //animator.SetBool("IsAttacking", false);
       }
     }
   }
 
   [RPC]
   void CastSpell(NetworkPlayer player, int spellArrLoc, int team, Vector3 castTo) {
+    Debug.Log("Player " + player + " is trying to cast spell #" + spellArrLoc);
+    Debug.Log("Spell cast from scene object " + transform.name);
     // Don't even touch the function if they've already cast too recently.
     if (Time.time - lastCastTime < Constants.MIN_RECAST_TIME) {
       return;
@@ -103,10 +105,10 @@ public class NetworkSpellInterface : MonoBehaviour {
     // TODO: WRITE THAT CODE ^
     Mana mana = GetCasterMana(player);
 
-    if (spellScript && spellScript.WillCastSuccessfully(spawnPosition, GetCastEndpoint()) &&
+    if (spellScript && spellScript.WillCastSuccessfully(spawnPosition, castTo) &&
        mana.DrainMana(spellScript.m_manaCost)) {
       // Run the attack animation over the network
-      networkView.RPC("StartNetworkAnimation", RPCMode.All, "attack", (float)Network.time);
+      //networkView.RPC("StartNetworkAnimation", RPCMode.All, "attack", (float)Network.time);
 
       spellScript.m_Team = myTeam;
 
@@ -179,7 +181,6 @@ public class NetworkSpellInterface : MonoBehaviour {
 
     RaycastHit hit;
     if (!myCamera) {
-      Debug.Log("Missing camera");
     }
     if (Physics.Raycast(/*(handJoint ? handJoint.position : transform.position)*/myCamera.transform.position,
                myCamera.transform.forward,
